@@ -1,4 +1,4 @@
-package com.example.maxlish
+package com.example.maxlish.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.maxlish.ui.theme.MaxLishTheme
+import com.example.maxlish.core.ui.theme.MaxLishTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

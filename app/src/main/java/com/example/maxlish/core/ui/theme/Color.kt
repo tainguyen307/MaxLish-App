@@ -1,4 +1,4 @@
-package com.example.maxlish.ui.theme
+package com.example.maxlish.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
