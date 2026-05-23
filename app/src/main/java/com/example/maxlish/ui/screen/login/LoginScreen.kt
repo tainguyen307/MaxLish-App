@@ -12,35 +12,28 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-@Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
-    var email by remember {
-        mutableStateOf("")
-    }
-    var password by remember {
-        mutableStateOf("")
-    }
-
+fun LoginScreen(
+    viewModel: LoginViewModel = viewModel()
+) {
+    val state by viewModel.state.collectAsState()
     Scaffold {
         Column(
             modifier = Modifier
@@ -68,9 +61,11 @@ fun LoginScreen() {
                         .padding(20.dp)
                 ) {
                     OutlinedTextField(
-                        value = email,
+                        value = state.email,
                         onValueChange = {
-                            email = it
+                            viewModel.onEvent(
+                                LoginEvent.EmailChanged(it)
+                            )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         label = {
@@ -82,13 +77,23 @@ fun LoginScreen() {
                                 contentDescription = null
                             )
                         },
-                        singleLine = true
+                        singleLine = true,
+                        isError =
+                            state.emailError != null
                     )
+                    if (state.emailError != null) {
+                        Text(
+                            text = state.emailError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     OutlinedTextField(
-                        value = password,
+                        value = state.password,
                         onValueChange = {
-                            password = it
+                            viewModel.onEvent(
+                                LoginEvent.PasswordChanged(it)
+                            )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         label = {
@@ -102,15 +107,32 @@ fun LoginScreen() {
                         },
                         visualTransformation =
                             PasswordVisualTransformation(),
-                        singleLine = true
+                        singleLine = true,
+                        isError =
+                            state.passwordError != null
                     )
+                    if (state.passwordError != null) {
+                        Text(
+                            text = state.passwordError!!,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = {
+                            viewModel.onEvent(
+                                LoginEvent.LoginClicked
+                            )
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !state.isLoading
                     ) {
-                        Text("Login")
+                        if (state.isLoading) {
+
+                            CircularProgressIndicator()
+                        } else {
+                            Text("Login")
+                        }
                     }
                 }
             }
