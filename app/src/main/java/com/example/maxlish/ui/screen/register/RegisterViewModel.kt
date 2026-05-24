@@ -2,6 +2,7 @@ package com.example.maxlish.ui.screen.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.maxlish.R
 import com.example.maxlish.data.repository.FirebaseAuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,29 +38,29 @@ class RegisterViewModel(
 
     private fun validate(): Boolean {
         val s = _state.value
-        var nameError: String? = null
-        var emailError: String? = null
-        var passwordError: String? = null
-        var confirmPasswordError: String? = null
+        var nameError: Int? = null
+        var emailError: Int? = null
+        var passwordError: Int? = null
+        var confirmPasswordError: Int? = null
         var hasError = false
 
         if (s.name.isBlank()) {
-            nameError = "Họ tên không được để trống"
+            nameError = R.string.error_empty_name
             hasError = true
         }
         if (s.email.isBlank()) {
-            emailError = "Email không được để trống"
+            emailError = R.string.error_empty_email
             hasError = true
         } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(s.email).matches()) {
-            emailError = "Địa chỉ email không hợp lệ"
+            emailError = R.string.error_invalid_email
             hasError = true
         }
         if (s.password.length < 6) {
-            passwordError = "Mật khẩu phải có ít nhất 6 ký tự"
+            passwordError = R.string.error_invalid_password
             hasError = true
         }
         if (s.confirmPassword != s.password) {
-            confirmPasswordError = "Mật khẩu xác nhận không khớp"
+            confirmPasswordError = R.string.error_mismatched_confirm_password
             hasError = true
         }
 

@@ -108,7 +108,7 @@ fun RegisterScreen(
                         },
                         singleLine = true,
                         isError = state.nameError != null,
-                        supportingText = state.nameError?.let { { Text(it) } }
+                        supportingText = state.nameError?.let { { Text(stringResource(it)) } }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -124,7 +124,7 @@ fun RegisterScreen(
                         singleLine = true,
                         isError = state.emailError != null,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                        supportingText = state.emailError?.let { { Text(it) } }
+                        supportingText = state.emailError?.let { { Text(stringResource(it)) } }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -141,7 +141,7 @@ fun RegisterScreen(
                         singleLine = true,
                         isError = state.passwordError != null,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        supportingText = state.passwordError?.let { { Text(it) } }
+                        supportingText = state.passwordError?.let { { Text(stringResource(it)) } }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -158,7 +158,7 @@ fun RegisterScreen(
                         singleLine = true,
                         isError = state.confirmPasswordError != null,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        supportingText = state.confirmPasswordError?.let { { Text(it) } }
+                        supportingText = state.confirmPasswordError?.let { { Text(stringResource(it)) } }
                     )
 
                     // Lỗi chung từ server
