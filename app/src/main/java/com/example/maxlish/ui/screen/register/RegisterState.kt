@@ -6,10 +6,10 @@ data class RegisterState(
     val password: String = "",
     val confirmPassword: String = "",
     val isLoading: Boolean = false,
-    val nameError: String? = null,
-    val emailError: String? = null,
-    val passwordError: String? = null,
-    val confirmPasswordError: String? = null,
+    val nameError: Int? = null,
+    val emailError: Int? = null,
+    val passwordError: Int? = null,
+    val confirmPasswordError: Int? = null,
     val generalError: String? = null,
     val isSuccess: Boolean = false
 )
