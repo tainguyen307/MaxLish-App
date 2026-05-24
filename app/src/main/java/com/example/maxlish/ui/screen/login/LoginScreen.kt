@@ -41,12 +41,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.maxlish.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -98,7 +100,7 @@ fun LoginScreen(
 
             // Logo / Tiêu đề
             Text(
-                text = "MinLish",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.displaySmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -106,7 +108,7 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Learn vocabulary smarter",
+                text = stringResource(R.string.slogan),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -31,12 +31,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.maxlish.R
 
 @Composable
 fun RegisterScreen(
@@ -66,7 +68,7 @@ fun RegisterScreen(
 
             // Tiêu đề
             Text(
-                text = "MinLish",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.displaySmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
