@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "954231504710",
+    "project_id": "maxlish-app",
+    "storage_bucket": "maxlish-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:954231504710:android:6c4337ea4750943193af47",
+        "android_client_info": {
+          "package_name": "com.example.maxlish"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "954231504710-ca0s3e45bjnvjeepjimpoektk4ihm8j9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.maxlish",
+            "certificate_hash": "3098c23a9d9b22ea5da3ff6275e8e90087e9d545"
+          }
+        },
+        {
+          "client_id": "954231504710-h7mnbcqpsl9ph1fg5lc6rci99rcpoltq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcy1JoaIOvUBOPinn689yVFfud9j2vsU0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "954231504710-h7mnbcqpsl9ph1fg5lc6rci99rcpoltq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,22 +1,28 @@
 package com.example.maxlish.ui.screen.login
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.maxlish.data.repository.FirebaseAuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
-    private val _state = MutableStateFlow(
-        LoginState()
-    )
+class LoginViewModel(
+    private val authRepository: FirebaseAuthRepository = FirebaseAuthRepository()
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
+
     fun onEvent(event: LoginEvent) {
         when (event) {
             is LoginEvent.EmailChanged -> {
                 _state.update {
                     it.copy(
                         email = event.value,
-                        emailError = null
+                        emailError = null,
+                        generalError = null
                     )
                 }
             }
@@ -24,58 +30,90 @@ class LoginViewModel : ViewModel() {
                 _state.update {
                     it.copy(
                         password = event.value,
-                        passwordError = null
+                        passwordError = null,
+                        generalError = null
                     )
                 }
             }
             LoginEvent.LoginClicked -> {
-                validateLogin()
+                if (validateLogin()) {
+                    performLogin()
+                }
+            }
+            LoginEvent.GoogleSignInClicked -> {
+                // Được handle ở Activity/Screen thông qua Google Sign-In flow
+            }
+            is LoginEvent.GoogleIdTokenReceived -> {
+                loginWithGoogle(event.idToken)
             }
         }
     }
-    private fun validateLogin() {
+
+    private fun validateLogin(): Boolean {
         val currentState = _state.value
         var hasError = false
         var emailError: String? = null
         var passwordError: String? = null
-        if (
-            currentState.email.isBlank()
-        ) {
-            emailError = "Email cannot be empty"
+
+        if (currentState.email.isBlank()) {
+            emailError = "Email không được để trống"
+            hasError = true
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches()) {
+            emailError = "Địa chỉ email không hợp lệ"
             hasError = true
         }
-        if (
-            currentState.password.length < 6
-        ) {
-            passwordError =
-                "Password must be at least 6 characters"
+
+        if (currentState.password.length < 6) {
+            passwordError = "Mật khẩu phải có ít nhất 6 ký tự"
             hasError = true
         }
+
         _state.update {
             it.copy(
                 emailError = emailError,
                 passwordError = passwordError
             )
         }
-        if (!hasError) {
-            login()
-        }
+        return !hasError
     }
-    private fun login() {
-        _state.update {
-            it.copy(
-                isLoading = true
+
+    private fun performLogin() {
+        val currentState = _state.value
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, generalError = null) }
+            val result = authRepository.login(currentState.email, currentState.password)
+            result.fold(
+                onSuccess = {
+                    _state.update { it.copy(isLoading = false, isSuccess = true) }
+                },
+                onFailure = { error ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            generalError = error.message
+                        )
+                    }
+                }
             )
         }
-        /*
-            TODO:
-            Call API here later
-         */
+    }
 
-        _state.update {
-
-            it.copy(
-                isLoading = false
+    private fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, generalError = null) }
+            val result = authRepository.loginWithGoogle(idToken)
+            result.fold(
+                onSuccess = {
+                    _state.update { it.copy(isLoading = false, isSuccess = true) }
+                },
+                onFailure = { error ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            generalError = error.message
+                        )
+                    }
+                }
             )
         }
     }

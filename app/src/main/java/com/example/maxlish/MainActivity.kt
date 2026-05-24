@@ -3,7 +3,7 @@ package com.example.maxlish
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.maxlish.ui.screen.login.LoginScreen
+import com.example.maxlish.ui.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
 
@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            LoginScreen()
+            AppNavGraph()
         }
     }
-}
+}
