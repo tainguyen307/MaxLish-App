@@ -10,4 +10,6 @@ sealed class LoginEvent {
     ) : LoginEvent()
 
     object LoginClicked : LoginEvent()
-}
+    object GoogleSignInClicked : LoginEvent()
+    data class GoogleIdTokenReceived(val idToken: String) : LoginEvent()
+}
