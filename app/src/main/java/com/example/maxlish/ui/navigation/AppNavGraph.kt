@@ -1,14 +1,20 @@
 package com.example.maxlish.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.maxlish.data.repository.FirebaseAuthRepository
+import com.example.maxlish.data.repository.FirebaseProgressRepository
 import com.example.maxlish.ui.screen.home.HomeScreen
 import com.example.maxlish.ui.screen.login.LoginScreen
 import com.example.maxlish.ui.screen.profile.ProfileScreen
+import com.example.maxlish.ui.screen.progress.ProgressScreen
+import com.example.maxlish.ui.screen.progress.ProgressViewModel
 import com.example.maxlish.ui.screen.register.RegisterScreen
 
 object AppDestinations {
@@ -16,6 +22,7 @@ object AppDestinations {
     const val REGISTER = "register"
     const val PROFILE = "profile"
     const val HOME = "home"
+    const val PROGRESS = "progress"
 }
 
 @Composable
@@ -80,11 +87,29 @@ fun AppNavGraph(
                 onNavigateToProfile = {
                     navController.navigate(AppDestinations.PROFILE)
                 },
+                onNavigateToProgress = {
+                    navController.navigate(AppDestinations.PROGRESS)
+                },
                 onLogout = {
                     navController.navigate(AppDestinations.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable(AppDestinations.PROGRESS) {
+            val progressRepository = FirebaseProgressRepository()
+            val viewModel: ProgressViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return ProgressViewModel(authRepository, progressRepository) as T
+                    }
+                }
+            )
+            ProgressScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }
