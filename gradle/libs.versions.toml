@@ -1,6 +1,7 @@
 [versions]
 agp = "9.2.1"
 coreKtx = "1.10.1"
+firebaseBomVersion = "33.1.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
@@ -21,11 +22,16 @@ playServicesAuth = "21.3.0"
 navigationCompose = "2.9.0"
 coroutines = "1.10.2"
 googleServices = "4.4.2"
+firebaseFirestore = "26.3.0"
+playServicesAuthVersion = "21.2.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-bom-v3310 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -51,6 +57,7 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" 
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+play-services-auth-v2120 = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuthVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
