@@ -52,7 +52,7 @@ class ProfileViewModel(
         }
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = authRepository.updateProfile(s.displayName, s.learningGoal, s.level)
+            val result = authRepository.updateProfile(s.displayName, s.learningGoal.name, s.level.name)
             result.fold(
                 onSuccess = {
                     _state.update { it.copy(isLoading = false, isSaveSuccess = true) }
