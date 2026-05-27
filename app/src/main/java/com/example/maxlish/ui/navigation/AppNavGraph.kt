@@ -8,7 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.maxlish.data.repository.FirebaseAuthRepository
 import com.example.maxlish.ui.screen.home.HomeScreen
 import com.example.maxlish.ui.screen.login.LoginScreen
-import com.example.maxlish.ui.screen.profile.ProfileScreen
+import com.example.maxlish.ui.screen.profile.ProfileRoute
 import com.example.maxlish.ui.screen.register.RegisterScreen
 
 object AppDestinations {
@@ -61,7 +61,7 @@ fun AppNavGraph(
         }
 
         composable(AppDestinations.PROFILE) {
-            ProfileScreen(
+            ProfileRoute (
                 onSaveSuccess = {
                     navController.navigate(AppDestinations.HOME) {
                         popUpTo(AppDestinations.LOGIN) { inclusive = true }

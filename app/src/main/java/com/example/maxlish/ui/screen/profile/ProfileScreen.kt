@@ -46,11 +46,11 @@ import com.example.maxlish.data.model.UserLevel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(),
+    state: ProfileState,
+    onEvent: (ProfileEvent) -> Unit,
     onSaveSuccess: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
-    val state by viewModel.state.collectAsState()
     var goalExpanded by remember { mutableStateOf(false) }
     var levelExpanded by remember { mutableStateOf(false) }
 
@@ -103,7 +103,7 @@ fun ProfileScreen(
                     // Tên hiển thị
                     OutlinedTextField(
                         value = state.displayName,
-                        onValueChange = { viewModel.onEvent(ProfileEvent.NameChanged(it)) },
+                        onValueChange = { onEvent(ProfileEvent.NameChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Tên hiển thị") },
                         leadingIcon = {
@@ -142,7 +142,7 @@ fun ProfileScreen(
                                 DropdownMenuItem(
                                     text = { Text(goal.displayName) },
                                     onClick = {
-                                        viewModel.onEvent(ProfileEvent.GoalChanged(goal))
+                                        onEvent(ProfileEvent.GoalChanged(goal))
                                         goalExpanded = false
                                     }
                                 )
@@ -178,7 +178,7 @@ fun ProfileScreen(
                                 DropdownMenuItem(
                                     text = { Text(lvl.name) },
                                     onClick = {
-                                        viewModel.onEvent(ProfileEvent.LevelChanged(lvl))
+                                        onEvent(ProfileEvent.LevelChanged(lvl))
                                         levelExpanded = false
                                     }
                                 )
@@ -190,7 +190,7 @@ fun ProfileScreen(
 
                     // Nút Lưu
                     Button(
-                        onClick = { viewModel.onEvent(ProfileEvent.SaveClicked) },
+                        onClick = { onEvent(ProfileEvent.SaveClicked) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
@@ -212,7 +212,7 @@ fun ProfileScreen(
                     // Nút Đăng xuất
                     OutlinedButton(
                         onClick = {
-                            viewModel.onEvent(ProfileEvent.LogoutClicked)
+                            onEvent(ProfileEvent.LogoutClicked)
                             onLogout()
                         },
                         modifier = Modifier
