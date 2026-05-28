@@ -19,11 +19,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -40,15 +40,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.maxlish.data.model.LearningGoal
+import com.example.maxlish.data.model.UserLevel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel(),
+    state: ProfileState,
+    onEvent: (ProfileEvent) -> Unit,
     onSaveSuccess: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
-    val state by viewModel.state.collectAsState()
     var goalExpanded by remember { mutableStateOf(false) }
     var levelExpanded by remember { mutableStateOf(false) }
 
@@ -101,7 +103,7 @@ fun ProfileScreen(
                     // Tên hiển thị
                     OutlinedTextField(
                         value = state.displayName,
-                        onValueChange = { viewModel.onEvent(ProfileEvent.NameChanged(it)) },
+                        onValueChange = { onEvent(ProfileEvent.NameChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Tên hiển thị") },
                         leadingIcon = {
@@ -121,12 +123,12 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         OutlinedTextField(
-                            value = state.learningGoal,
+                            value = state.learningGoal.displayName,
                             onValueChange = {},
                             readOnly = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                             label = { Text("Mục tiêu học") },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = goalExpanded)
@@ -136,11 +138,11 @@ fun ProfileScreen(
                             expanded = goalExpanded,
                             onDismissRequest = { goalExpanded = false }
                         ) {
-                            LEARNING_GOALS.forEach { goal ->
+                            LearningGoal.entries.forEach { goal ->
                                 DropdownMenuItem(
-                                    text = { Text(goal) },
+                                    text = { Text(goal.displayName) },
                                     onClick = {
-                                        viewModel.onEvent(ProfileEvent.GoalChanged(goal))
+                                        onEvent(ProfileEvent.GoalChanged(goal))
                                         goalExpanded = false
                                     }
                                 )
@@ -157,12 +159,12 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         OutlinedTextField(
-                            value = state.level,
+                            value = state.level.name,
                             onValueChange = {},
                             readOnly = true,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                             label = { Text("Trình độ hiện tại") },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = levelExpanded)
@@ -172,11 +174,11 @@ fun ProfileScreen(
                             expanded = levelExpanded,
                             onDismissRequest = { levelExpanded = false }
                         ) {
-                            LEVELS.forEach { lvl ->
+                            UserLevel.entries.forEach { lvl ->
                                 DropdownMenuItem(
-                                    text = { Text(lvl) },
+                                    text = { Text(lvl.name) },
                                     onClick = {
-                                        viewModel.onEvent(ProfileEvent.LevelChanged(lvl))
+                                        onEvent(ProfileEvent.LevelChanged(lvl))
                                         levelExpanded = false
                                     }
                                 )
@@ -188,7 +190,7 @@ fun ProfileScreen(
 
                     // Nút Lưu
                     Button(
-                        onClick = { viewModel.onEvent(ProfileEvent.SaveClicked) },
+                        onClick = { onEvent(ProfileEvent.SaveClicked) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
@@ -210,7 +212,7 @@ fun ProfileScreen(
                     // Nút Đăng xuất
                     OutlinedButton(
                         onClick = {
-                            viewModel.onEvent(ProfileEvent.LogoutClicked)
+                            onEvent(ProfileEvent.LogoutClicked)
                             onLogout()
                         },
                         modifier = Modifier
