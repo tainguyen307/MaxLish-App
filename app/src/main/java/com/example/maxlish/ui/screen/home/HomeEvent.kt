@@ -13,4 +13,6 @@ sealed interface HomeEvent {
     data class OnCourseClick(
         val courseId: String
     ) : HomeEvent
+
+    data object OnProgressClick : HomeEvent
 }
