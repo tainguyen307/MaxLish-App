@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -55,7 +56,8 @@ fun AppNavGraph(
 
     val showBottomBar =
         currentRoute == AppDestinations.HOME ||
-                currentRoute == AppDestinations.PROFILE
+                currentRoute == AppDestinations.PROFILE ||
+                currentRoute == AppDestinations.PROGRESS
 
     Scaffold(
         bottomBar = {
@@ -66,6 +68,7 @@ fun AppNavGraph(
                         onClick = {
                             navController.navigate(AppDestinations.HOME) {
                                 launchSingleTop = true
+                                popUpTo(AppDestinations.HOME) { inclusive = false }
                             }
                         },
                         icon = {
@@ -76,6 +79,24 @@ fun AppNavGraph(
                         },
                         label = {
                             Text("Home")
+                        }
+                    )
+
+                    NavigationBarItem(
+                        selected = currentRoute == AppDestinations.PROGRESS,
+                        onClick = {
+                            navController.navigate(AppDestinations.PROGRESS) {
+                                launchSingleTop = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.BarChart,
+                                contentDescription = "Progress"
+                            )
+                        },
+                        label = {
+                            Text("Progress")
                         }
                     )
 
@@ -176,8 +197,7 @@ fun AppNavGraph(
                     }
                 )
                 ProgressScreen(
-                    viewModel = viewModel,
-                    onBack = { navController.popBackStack() }
+                    viewModel = viewModel
                 )
             }
         }
