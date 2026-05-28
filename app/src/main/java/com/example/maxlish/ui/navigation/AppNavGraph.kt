@@ -1,20 +1,36 @@
 package com.example.maxlish.ui.navigation
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.maxlish.data.repository.FirebaseAuthRepository
-import com.example.maxlish.ui.screen.home.HomeScreen
+import com.example.maxlish.ui.screen.home.HomeRoute
 import com.example.maxlish.ui.screen.login.LoginScreen
 import com.example.maxlish.ui.screen.profile.ProfileRoute
 import com.example.maxlish.ui.screen.register.RegisterScreen
 
 object AppDestinations {
+
     const val LOGIN = "login"
+
     const val REGISTER = "register"
+
     const val PROFILE = "profile"
+
     const val HOME = "home"
 }
 
@@ -22,70 +38,202 @@ object AppDestinations {
 fun AppNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
+
     val authRepository = FirebaseAuthRepository()
-    // Xác định màn hình bắt đầu: nếu đã đăng nhập → home, chưa → login
-    val startDestination = if (authRepository.getCurrentUser() != null) {
-        AppDestinations.HOME
-    } else {
-        AppDestinations.LOGIN
-    }
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        composable(AppDestinations.LOGIN) {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(AppDestinations.HOME) {
-                        popUpTo(AppDestinations.LOGIN) { inclusive = true }
-                    }
-                },
-                onNavigateToRegister = {
-                    navController.navigate(AppDestinations.REGISTER)
-                }
-            )
+    val startDestination =
+        if (authRepository.getCurrentUser() != null) {
+            AppDestinations.HOME
+        } else {
+            AppDestinations.LOGIN
         }
 
-        composable(AppDestinations.REGISTER) {
-            RegisterScreen(
-                onRegisterSuccess = {
-                    navController.navigate(AppDestinations.PROFILE) {
-                        popUpTo(AppDestinations.REGISTER) { inclusive = true }
-                    }
-                },
-                onNavigateToLogin = {
-                    navController.popBackStack()
+    val backStackEntry by
+    navController.currentBackStackEntryAsState()
+
+    val currentRoute =
+        backStackEntry?.destination?.route
+
+    val showBottomBar =
+        currentRoute == AppDestinations.HOME ||
+                currentRoute == AppDestinations.PROFILE
+
+    Scaffold(
+
+        bottomBar = {
+
+            if (showBottomBar) {
+
+                NavigationBar {
+
+                    NavigationBarItem(
+
+                        selected =
+                            currentRoute == AppDestinations.HOME,
+
+                        onClick = {
+
+                            navController.navigate(
+                                AppDestinations.HOME
+                            ) {
+
+                                launchSingleTop = true
+                            }
+                        },
+
+                        icon = {
+
+                            Icon(
+                                imageVector = Icons.Default.Home,
+                                contentDescription = null
+                            )
+                        },
+
+                        label = {
+
+                            Text("Home")
+                        }
+                    )
+
+                    NavigationBarItem(
+
+                        selected =
+                            currentRoute == AppDestinations.PROFILE,
+
+                        onClick = {
+
+                            navController.navigate(
+                                AppDestinations.PROFILE
+                            ) {
+
+                                launchSingleTop = true
+                            }
+                        },
+
+                        icon = {
+
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null
+                            )
+                        },
+
+                        label = {
+
+                            Text("Profile")
+                        }
+                    )
                 }
-            )
+            }
         }
 
-        composable(AppDestinations.PROFILE) {
-            ProfileRoute (
-                onSaveSuccess = {
-                    navController.navigate(AppDestinations.HOME) {
-                        popUpTo(AppDestinations.LOGIN) { inclusive = true }
-                    }
-                },
-                onLogout = {
-                    navController.navigate(AppDestinations.LOGIN) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
+    ) { paddingValues ->
 
-        composable(AppDestinations.HOME) {
-            HomeScreen(
-                onNavigateToProfile = {
-                    navController.navigate(AppDestinations.PROFILE)
-                },
-                onLogout = {
-                    navController.navigate(AppDestinations.LOGIN) {
-                        popUpTo(0) { inclusive = true }
+        NavHost(
+
+            navController = navController,
+
+            startDestination = startDestination,
+
+            modifier = Modifier.padding(paddingValues)
+        ) {
+
+            composable(AppDestinations.LOGIN) {
+
+                LoginScreen(
+
+                    onLoginSuccess = {
+
+                        navController.navigate(
+                            AppDestinations.HOME
+                        ) {
+
+                            popUpTo(
+                                AppDestinations.LOGIN
+                            ) {
+                                inclusive = true
+                            }
+                        }
+                    },
+
+                    onNavigateToRegister = {
+
+                        navController.navigate(
+                            AppDestinations.REGISTER
+                        )
                     }
-                }
-            )
+                )
+            }
+
+            composable(AppDestinations.REGISTER) {
+
+                RegisterScreen(
+
+                    onRegisterSuccess = {
+
+                        navController.navigate(
+                            AppDestinations.PROFILE
+                        ) {
+
+                            popUpTo(
+                                AppDestinations.REGISTER
+                            ) {
+                                inclusive = true
+                            }
+                        }
+                    },
+
+                    onNavigateToLogin = {
+
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(AppDestinations.PROFILE) {
+
+                ProfileRoute(
+
+                    onSaveSuccess = {
+
+                        navController.navigate(
+                            AppDestinations.HOME
+                        ) {
+
+                            popUpTo(
+                                AppDestinations.LOGIN
+                            ) {
+                                inclusive = true
+                            }
+                        }
+                    },
+
+                    onLogout = {
+
+                        navController.navigate(
+                            AppDestinations.LOGIN
+                        ) {
+
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(AppDestinations.HOME) {
+
+                HomeRoute(
+
+                    onNavigateToProfile = {
+
+                        navController.navigate(
+                            AppDestinations.PROFILE
+                        )
+                    }
+                )
+            }
         }
     }
 }
