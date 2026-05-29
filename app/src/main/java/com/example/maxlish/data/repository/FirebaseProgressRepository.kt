@@ -3,13 +3,12 @@ package com.example.maxlish.data.repository
 import com.example.maxlish.data.model.StudySession
 import com.example.maxlish.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-class FirebaseProgressRepository : ProgressRepository {
+class FirebaseProgressRepository(instance: FirebaseFirestore) : ProgressRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
 
