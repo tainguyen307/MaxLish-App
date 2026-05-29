@@ -60,6 +60,10 @@ class HomeViewModel : ViewModel() {
             is HomeEvent.OnCourseClick -> {
 
             }
+
+            HomeEvent.OnProgressClick -> {
+                // Handle progress click if needed, or leave for Route
+            }
         }
     }
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -27,11 +26,9 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Button
@@ -40,14 +37,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -87,35 +79,6 @@ fun HomeScreen(
     state: HomeState,
     onEvent: (HomeEvent) -> Unit
 ) {
-
-    val selectedBottomNav = remember {
-        mutableIntStateOf(0)
-    }
-
-    val courses = listOf(
-        Course(
-            title = "IELTS Vocabulary",
-            words = 840,
-            progress = 0.75f,
-            icon = Icons.Default.MenuBook,
-            color = Primary
-        ),
-        Course(
-            title = "Daily Communication",
-            words = 250,
-            progress = 0.35f,
-            icon = Icons.Default.Chat,
-            color = Secondary
-        ),
-        Course(
-            title = "Business English",
-            words = 1200,
-            progress = 0.1f,
-            icon = Icons.Default.Work,
-            color = Orange
-        )
-    )
-
     val quickActions = listOf(
         QuickAction(
             title = "Vocabulary",
@@ -155,15 +118,20 @@ fun HomeScreen(
         ) {
 
             item {
-                HomeTopBar()
+                HomeTopBar(state.userName, state.streak)
             }
 
             item {
-                ContinueLearningCard()
+                ContinueLearningCard(
+                    onContinueClick = { onEvent(HomeEvent.OnContinueLearningClick) }
+                )
             }
 
             item {
-                ReviewDueCard()
+                ReviewDueCard(
+                    count = state.reviewCount,
+                    onReviewClick = { onEvent(HomeEvent.OnReviewClick) }
+                )
             }
 
             item {
@@ -186,16 +154,29 @@ fun HomeScreen(
 
             item {
                 CourseSection(
-                    courses = courses
+                    courses = state.courses.map {
+                        Course(
+                            title = it.title,
+                            words = it.totalWords,
+                            progress = it.progress,
+                            icon = Icons.Default.MenuBook,
+                            color = Primary
+                        )
+                    },
+                    onCourseClick = { courseId -> onEvent(HomeEvent.OnCourseClick(courseId)) }
                 )
             }
 
             item {
-                DailyChallengeCard()
+                DailyChallengeCard(
+                    onStartClick = { onEvent(HomeEvent.OnDailyChallengeClick) }
+                )
             }
 
             item {
-                WeeklyActivityCard()
+                WeeklyActivityCard(
+                    onClick = { onEvent(HomeEvent.OnProgressClick) }
+                )
             }
 
             item {
@@ -208,20 +189,16 @@ fun HomeScreen(
 }
 
 @Composable
-fun HomeTopBar() {
-
+fun HomeTopBar(userName: String, streak: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
-
         Column {
-
             Spacer(modifier = Modifier.height(4.dp))
-
             Text(
-                text = "Tai",
+                text = userName,
                 color = TextPrimary,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold
@@ -232,7 +209,6 @@ fun HomeTopBar() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(100.dp))
@@ -240,18 +216,15 @@ fun HomeTopBar() {
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Icon(
                     imageVector = Icons.Default.LocalFireDepartment,
                     contentDescription = null,
                     tint = Orange,
                     modifier = Modifier.size(18.dp)
                 )
-
                 Spacer(modifier = Modifier.width(4.dp))
-
                 Text(
-                    text = "15",
+                    text = streak.toString(),
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold
                 )
@@ -264,7 +237,6 @@ fun HomeTopBar() {
                     .background(CardColor),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = null,
@@ -276,15 +248,13 @@ fun HomeTopBar() {
 }
 
 @Composable
-fun ContinueLearningCard() {
-
+fun ContinueLearningCard(onContinueClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = Primary
         )
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -298,31 +268,24 @@ fun ContinueLearningCard() {
                 )
                 .padding(24.dp)
         ) {
-
             Text(
                 text = "Continue Learning",
                 color = Color.White.copy(alpha = 0.75f),
                 fontSize = 14.sp
             )
-
             Spacer(modifier = Modifier.height(10.dp))
-
             Text(
                 text = "IELTS Vocabulary",
                 color = Color.White,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold
             )
-
             Spacer(modifier = Modifier.height(6.dp))
-
             Text(
                 text = "Lesson 12 • 25 words remaining",
                 color = Color.White.copy(alpha = 0.85f)
             )
-
             Spacer(modifier = Modifier.height(24.dp))
-
             LinearProgressIndicator(
                 progress = { 0.5f },
                 modifier = Modifier
@@ -332,47 +295,28 @@ fun ContinueLearningCard() {
                 color = Secondary,
                 trackColor = Color.White.copy(alpha = 0.2f)
             )
-
             Spacer(modifier = Modifier.height(24.dp))
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
-                HeroStat(
-                    title = "XP",
-                    value = "+120"
-                )
-
-                HeroStat(
-                    title = "Accuracy",
-                    value = "92%"
-                )
-
-                HeroStat(
-                    title = "Review",
-                    value = "42"
-                )
+                HeroStat(title = "XP", value = "+120")
+                HeroStat(title = "Accuracy", value = "92%")
+                HeroStat(title = "Review", value = "42")
             }
-
             Spacer(modifier = Modifier.height(24.dp))
-
             Button(
-                onClick = {},
+                onClick = onContinueClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
                     tint = Primary
                 )
-
                 Spacer(modifier = Modifier.width(6.dp))
-
                 Text(
                     text = "Continue",
                     color = Primary,
@@ -384,26 +328,19 @@ fun ContinueLearningCard() {
 }
 
 @Composable
-fun HeroStat(
-    title: String,
-    value: String
-) {
-
+fun HeroStat(title: String, value: String) {
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(18.dp))
             .background(Color.White.copy(alpha = 0.14f))
             .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
-
         Text(
             text = title,
             color = Color.White.copy(alpha = 0.75f),
             fontSize = 12.sp
         )
-
         Spacer(modifier = Modifier.height(4.dp))
-
         Text(
             text = value,
             color = Color.White,
@@ -414,15 +351,13 @@ fun HeroStat(
 }
 
 @Composable
-fun ReviewDueCard() {
-
+fun ReviewDueCard(count: Int, onReviewClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardColor
         )
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -430,27 +365,22 @@ fun ReviewDueCard() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Column {
-
                 Text(
                     text = "Review Due",
                     color = TextSecondary,
                     fontSize = 14.sp
                 )
-
                 Spacer(modifier = Modifier.height(6.dp))
-
                 Text(
-                    text = "42 cards waiting",
+                    text = "$count cards waiting",
                     color = TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 22.sp
                 )
             }
-
             Button(
-                onClick = {},
+                onClick = onReviewClick,
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text("Review")
@@ -460,10 +390,7 @@ fun ReviewDueCard() {
 }
 
 @Composable
-fun SectionTitle(
-    title: String
-) {
-
+fun SectionTitle(title: String) {
     Text(
         text = title,
         color = TextPrimary,
@@ -473,27 +400,20 @@ fun SectionTitle(
 }
 
 @Composable
-fun QuickActionGrid(
-    actions: List<QuickAction>
-) {
-
+fun QuickActionGrid(actions: List<QuickAction>) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             actions.take(2).forEach {
                 QuickActionCard(action = it)
             }
         }
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             actions.drop(2).forEach {
                 QuickActionCard(action = it)
             }
@@ -502,10 +422,7 @@ fun QuickActionGrid(
 }
 
 @Composable
-fun RowScope.QuickActionCard(
-    action: QuickAction
-) {
-
+fun RowScope.QuickActionCard(action: QuickAction) {
     Card(
         modifier = Modifier
             .weight(1F)
@@ -516,14 +433,12 @@ fun RowScope.QuickActionCard(
             containerColor = CardColor
         )
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(18.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-
             Box(
                 modifier = Modifier
                     .size(46.dp)
@@ -531,14 +446,12 @@ fun RowScope.QuickActionCard(
                     .background(action.color.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = action.icon,
                     contentDescription = null,
                     tint = action.color
                 )
             }
-
             Text(
                 text = action.title,
                 color = TextPrimary,
@@ -550,42 +463,33 @@ fun RowScope.QuickActionCard(
 }
 
 @Composable
-fun CourseSection(
-    courses: List<Course>
-) {
-
+fun CourseSection(courses: List<Course>, onCourseClick: (String) -> Unit) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         items(courses) { course ->
-
             CourseCard(
-                course = course
+                course = course,
+                onClick = { onCourseClick(course.title) } // Using title as ID for now as Course data class doesn't have ID
             )
         }
     }
 }
 
 @Composable
-fun CourseCard(
-    course: Course
-) {
-
+fun CourseCard(course: Course, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .width(260.dp)
-            .clickable { },
+            .clickable { onClick() },
         shape = RoundedCornerShape(26.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardColor
         )
     ) {
-
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
-
             Box(
                 modifier = Modifier
                     .size(54.dp)
@@ -593,33 +497,26 @@ fun CourseCard(
                     .background(course.color.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
-
                 Icon(
                     imageVector = course.icon,
                     contentDescription = null,
                     tint = course.color
                 )
             }
-
             Spacer(modifier = Modifier.height(18.dp))
-
             Text(
                 text = course.title,
                 color = TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
-
             Spacer(modifier = Modifier.height(6.dp))
-
             Text(
                 text = "${course.words} words",
                 color = TextSecondary,
                 fontSize = 14.sp
             )
-
             Spacer(modifier = Modifier.height(18.dp))
-
             LinearProgressIndicator(
                 progress = { course.progress },
                 modifier = Modifier
@@ -629,9 +526,7 @@ fun CourseCard(
                 color = course.color,
                 trackColor = course.color.copy(alpha = 0.12f)
             )
-
             Spacer(modifier = Modifier.height(18.dp))
-
             Button(
                 onClick = {},
                 colors = ButtonDefaults.buttonColors(
@@ -639,81 +534,78 @@ fun CourseCard(
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-
-                Text(
-                    text = "Continue"
-                )
+                Text(text = "Continue")
             }
         }
     }
 }
 
 @Composable
-fun DailyChallengeCard() {
-
+fun DailyChallengeCard(onStartClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFFFF7ED)
         )
     ) {
-
         Column(
             modifier = Modifier.padding(22.dp)
         ) {
-
             Text(
                 text = "Daily Challenge 🔥",
                 color = TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp
             )
-
             Spacer(modifier = Modifier.height(10.dp))
-
             Text(
                 text = "Complete a 5-minute challenge and earn 50 XP.",
                 color = TextSecondary,
                 lineHeight = 22.sp
             )
-
             Spacer(modifier = Modifier.height(18.dp))
-
             Button(
-                onClick = {},
+                onClick = onStartClick,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Orange
                 )
             ) {
-
-                Text(
-                    text = "Start Challenge"
-                )
+                Text(text = "Start Challenge")
             }
         }
     }
 }
 
 @Composable
-fun WeeklyActivityCard() {
-
+fun WeeklyActivityCard(onClick: () -> Unit) {
     Card(
+        modifier = Modifier.clickable { onClick() },
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardColor
         )
     ) {
-
         Column(
             modifier = Modifier.padding(22.dp)
         ) {
-
-            Text(
-                text = "Weekly Activity",
-                color = TextPrimary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Weekly Activity",
+                    color = TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp
+                )
+                Text(
+                    text = "See Details",
+                    color = Primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -724,54 +616,25 @@ fun WeeklyActivityCard() {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-
-                val values = listOf(
-                    40,
-                    65,
-                    30,
-                    90,
-                    55,
-                    70,
-                    100
-                )
-
-                val days = listOf(
-                    "M",
-                    "T",
-                    "W",
-                    "T",
-                    "F",
-                    "S",
-                    "S"
-                )
+                val values = listOf(40, 65, 30, 90, 55, 70, 100)
+                val days = listOf("M", "T", "W", "T", "F", "S", "S")
 
                 values.forEachIndexed { index, value ->
-
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
-
                         Box(
                             modifier = Modifier
                                 .width(28.dp)
                                 .height(value.dp)
-                                .clip(
-                                    RoundedCornerShape(
-                                        topStart = 12.dp,
-                                        topEnd = 12.dp
-                                    )
-                                )
+                                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                                 .background(
-                                    if (index == values.lastIndex)
-                                        Primary
-                                    else
-                                        Primary.copy(alpha = 0.22f)
+                                    if (index == values.lastIndex) Primary
+                                    else Primary.copy(alpha = 0.22f)
                                 )
                         )
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text(
                             text = days[index],
                             color = TextSecondary
