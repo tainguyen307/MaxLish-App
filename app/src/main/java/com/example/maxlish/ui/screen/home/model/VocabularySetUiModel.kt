@@ -1,6 +1,6 @@
 package com.example.maxlish.ui.screen.home.model
 
-data class CourseUiModel(
+data class VocabularySetUiModel(
 
     val id: String,
 

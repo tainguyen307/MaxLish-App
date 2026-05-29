@@ -2,9 +2,10 @@ package com.example.maxlish.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,14 +22,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.maxlish.data.repository.FirebaseAuthRepository
 import com.example.maxlish.data.repository.FirebaseProgressRepository
+import com.example.maxlish.data.repository.FirebaseVocabularyRepository
 import com.example.maxlish.ui.screen.home.HomeRoute
 import com.example.maxlish.ui.screen.login.LoginScreen
 import com.example.maxlish.ui.screen.profile.ProfileRoute
 import com.example.maxlish.ui.screen.progress.ProgressScreen
 import com.example.maxlish.ui.screen.progress.ProgressViewModel
 import com.example.maxlish.ui.screen.register.RegisterScreen
+import com.example.maxlish.ui.screen.vocabulary.set.create.VocabularySetCreateRoute
+import com.example.maxlish.ui.screen.vocabulary.set.create.VocabularySetCreateViewModel
+import com.example.maxlish.ui.screen.vocabulary.set.detail.VocabularySetDetailRoute
+import com.example.maxlish.ui.screen.vocabulary.set.detail.VocabularySetDetailViewModel
+import com.example.maxlish.ui.screen.vocabulary.set.list.VocabularySetListRoute
+import com.google.firebase.firestore.FirebaseFirestore
 
 object AppDestinations {
     const val LOGIN = "login"
@@ -36,13 +45,28 @@ object AppDestinations {
     const val PROFILE = "profile"
     const val HOME = "home"
     const val PROGRESS = "progress"
+    const val VOCABULARY = "vocabulary"
+
+    const val VOCABULARY_CREATE = "vocabulary_create"
+
+    const val VOCABULARY_DETAIL = "vocabulary_set_detail/{setId}"
+
+    fun vocabularyDetail(setId: String): String {
+        return "vocabulary_set_detail/$setId"
+    }
 }
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
+
+    val firestore = FirebaseFirestore.getInstance()
+
     val authRepository = FirebaseAuthRepository()
+
+    val vocabularyRepository =
+        FirebaseVocabularyRepository(firestore)
 
     val startDestination =
         if (authRepository.getCurrentUser() != null) {
@@ -52,23 +76,34 @@ fun AppNavGraph(
         }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = backStackEntry?.destination?.route
+
+    val currentRoute =
+        backStackEntry?.destination?.route
 
     val showBottomBar =
         currentRoute == AppDestinations.HOME ||
                 currentRoute == AppDestinations.PROFILE ||
-                currentRoute == AppDestinations.PROGRESS
+                currentRoute == AppDestinations.PROGRESS ||
+                currentRoute == AppDestinations.VOCABULARY
 
     Scaffold(
         bottomBar = {
+
             if (showBottomBar) {
+
                 NavigationBar {
+
                     NavigationBarItem(
                         selected = currentRoute == AppDestinations.HOME,
                         onClick = {
-                            navController.navigate(AppDestinations.HOME) {
+                            navController.navigate(
+                                AppDestinations.HOME
+                            ) {
                                 launchSingleTop = true
-                                popUpTo(AppDestinations.HOME) { inclusive = false }
+
+                                popUpTo(AppDestinations.HOME) {
+                                    inclusive = false
+                                }
                             }
                         },
                         icon = {
@@ -83,16 +118,38 @@ fun AppNavGraph(
                     )
 
                     NavigationBarItem(
+                        selected = currentRoute == AppDestinations.VOCABULARY,
+                        onClick = {
+                            navController.navigate(
+                                AppDestinations.VOCABULARY
+                            ) {
+                                launchSingleTop = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Book,
+                                contentDescription = null
+                            )
+                        },
+                        label = {
+                            Text("Vocabulary")
+                        }
+                    )
+
+                    NavigationBarItem(
                         selected = currentRoute == AppDestinations.PROGRESS,
                         onClick = {
-                            navController.navigate(AppDestinations.PROGRESS) {
+                            navController.navigate(
+                                AppDestinations.PROGRESS
+                            ) {
                                 launchSingleTop = true
                             }
                         },
                         icon = {
                             Icon(
                                 imageVector = Icons.Default.BarChart,
-                                contentDescription = "Progress"
+                                contentDescription = null
                             )
                         },
                         label = {
@@ -103,7 +160,9 @@ fun AppNavGraph(
                     NavigationBarItem(
                         selected = currentRoute == AppDestinations.PROFILE,
                         onClick = {
-                            navController.navigate(AppDestinations.PROFILE) {
+                            navController.navigate(
+                                AppDestinations.PROFILE
+                            ) {
                                 launchSingleTop = true
                             }
                         },
@@ -121,35 +180,49 @@ fun AppNavGraph(
             }
         }
     ) { paddingValues ->
+
         NavHost(
             navController = navController,
             startDestination = startDestination,
             modifier = Modifier.padding(paddingValues)
         ) {
+
             composable(AppDestinations.LOGIN) {
+
                 LoginScreen(
                     onLoginSuccess = {
-                        navController.navigate(AppDestinations.HOME) {
+
+                        navController.navigate(
+                            AppDestinations.HOME
+                        ) {
                             popUpTo(AppDestinations.LOGIN) {
                                 inclusive = true
                             }
                         }
                     },
+
                     onNavigateToRegister = {
-                        navController.navigate(AppDestinations.REGISTER)
+                        navController.navigate(
+                            AppDestinations.REGISTER
+                        )
                     }
                 )
             }
 
             composable(AppDestinations.REGISTER) {
+
                 RegisterScreen(
                     onRegisterSuccess = {
-                        navController.navigate(AppDestinations.PROFILE) {
+
+                        navController.navigate(
+                            AppDestinations.PROFILE
+                        ) {
                             popUpTo(AppDestinations.REGISTER) {
                                 inclusive = true
                             }
                         }
                     },
+
                     onNavigateToLogin = {
                         navController.popBackStack()
                     }
@@ -157,16 +230,24 @@ fun AppNavGraph(
             }
 
             composable(AppDestinations.PROFILE) {
+
                 ProfileRoute(
                     onSaveSuccess = {
-                        navController.navigate(AppDestinations.HOME) {
+
+                        navController.navigate(
+                            AppDestinations.HOME
+                        ) {
                             popUpTo(AppDestinations.LOGIN) {
                                 inclusive = true
                             }
                         }
                     },
+
                     onLogout = {
-                        navController.navigate(AppDestinations.LOGIN) {
+
+                        navController.navigate(
+                            AppDestinations.LOGIN
+                        ) {
                             popUpTo(0) {
                                 inclusive = true
                             }
@@ -176,28 +257,146 @@ fun AppNavGraph(
             }
 
             composable(AppDestinations.HOME) {
+
                 HomeRoute(
                     onNavigateToProfile = {
-                        navController.navigate(AppDestinations.PROFILE)
+                        navController.navigate(
+                            AppDestinations.PROFILE
+                        )
                     },
+
                     onNavigateToProgress = {
-                        navController.navigate(AppDestinations.PROGRESS)
+                        navController.navigate(
+                            AppDestinations.PROGRESS
+                        )
+                    },
+
+                    onNavigateToVocabularySetDetail = { setId ->
+                        navController.navigate(AppDestinations.vocabularyDetail(setId))
                     }
                 )
             }
 
             composable(AppDestinations.PROGRESS) {
-                val progressRepository = FirebaseProgressRepository()
-                val viewModel: ProgressViewModel = viewModel(
-                    factory = object : ViewModelProvider.Factory {
-                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                            @Suppress("UNCHECKED_CAST")
-                            return ProgressViewModel(authRepository, progressRepository) as T
+
+                val progressRepository =
+                    FirebaseProgressRepository(firestore)
+
+                val viewModel: ProgressViewModel =
+                    viewModel(
+                        factory = object : ViewModelProvider.Factory {
+
+                            override fun <T : ViewModel> create(
+                                modelClass: Class<T>
+                            ): T {
+
+                                @Suppress("UNCHECKED_CAST")
+
+                                return ProgressViewModel(
+                                    authRepository,
+                                    progressRepository
+                                ) as T
+                            }
+                        }
+                    )
+
+                ProgressScreen(
+                    viewModel = viewModel
+                )
+            }
+
+            composable(AppDestinations.VOCABULARY) {
+
+                VocabularySetListRoute(
+
+                    onNavigateToDetail = { setId ->
+
+                        navController.navigate(
+                            AppDestinations.vocabularyDetail(setId)
+                        )
+                    },
+
+                    onNavigateToCreate = {
+
+                        navController.navigate(
+                            AppDestinations.VOCABULARY_CREATE
+                        )
+                    }
+                )
+            }
+
+            composable(
+                AppDestinations.VOCABULARY_CREATE
+            ) {
+
+                val currentUser =
+                    authRepository.getCurrentUser()
+
+                val viewModel:
+                        VocabularySetCreateViewModel =
+                    viewModel(
+                        factory = object : ViewModelProvider.Factory {
+
+                            override fun <T : ViewModel> create(
+                                modelClass: Class<T>
+                            ): T {
+
+                                @Suppress("UNCHECKED_CAST")
+
+                                return VocabularySetCreateViewModel(
+                                    repository = vocabularyRepository,
+                                    ownerId = currentUser?.uid ?: ""
+                                ) as T
+                            }
+                        }
+                    )
+
+                VocabularySetCreateRoute(
+                    viewModel = viewModel,
+                    onSuccess = {
+                        navController.popBackStack()
+                        navController.navigate(AppDestinations.VOCABULARY) {
+                            popUpTo(AppDestinations.VOCABULARY) {
+                                inclusive = true
+                            }
                         }
                     }
                 )
-                ProgressScreen(
-                    viewModel = viewModel
+            }
+
+            composable(
+                AppDestinations.VOCABULARY_DETAIL
+            ) { backStackEntry ->
+
+                val setId =
+                    backStackEntry.arguments?.getString("setId")
+
+                if (setId.isNullOrBlank()) {
+                    navController.popBackStack()
+                    return@composable
+                }
+
+                val viewModel: VocabularySetDetailViewModel =
+                    viewModel(
+                        factory = object : ViewModelProvider.Factory {
+
+                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+                                @Suppress("UNCHECKED_CAST")
+                                return VocabularySetDetailViewModel(
+                                    repository = vocabularyRepository
+                                ) as T
+                            }
+                        }
+                    )
+
+                VocabularySetDetailRoute(
+                    setId = setId,
+                    viewModel = viewModel,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onStartLearning = { }
                 )
             }
         }
