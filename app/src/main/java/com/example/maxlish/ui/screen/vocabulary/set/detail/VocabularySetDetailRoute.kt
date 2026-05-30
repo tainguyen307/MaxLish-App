@@ -1,7 +1,7 @@
 package com.example.maxlish.ui.screen.vocabulary.set.detail
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
@@ -9,11 +9,17 @@ import androidx.compose.runtime.getValue
 fun VocabularySetDetailRoute(
     setId: String,
     onBack: () -> Unit,
-    onStartLearning: (String) -> Unit,
-    viewModel: VocabularySetDetailViewModel = viewModel()
+    onNavigateToWordList: (String) -> Unit,
+    onNavigateToAddWord: (String) -> Unit,
+    onNavigateToLearn: (String) -> Unit,
+    viewModel: VocabularySetDetailViewModel
 ) {
 
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(setId) {
+        viewModel.load(setId)
+    }
 
     VocabularySetDetailScreen(
         state = state,
@@ -24,12 +30,25 @@ fun VocabularySetDetailRoute(
                     onBack()
                 }
 
-                VocabularySetDetailEvent.OnStartLearningClick -> {
-                    onStartLearning(setId)
+                VocabularySetDetailEvent.OnLearnClick -> {
+
+                    state.vocabularySet?.let {
+                        onNavigateToLearn(it.setId)
+                    }
                 }
 
-                else -> {
-                    viewModel.onEvent(event)
+                VocabularySetDetailEvent.OnViewWordsClick -> {
+
+                    state.vocabularySet?.let {
+                        onNavigateToWordList(it.setId)
+                    }
+                }
+
+                VocabularySetDetailEvent.OnAddWordClick -> {
+
+                    state.vocabularySet?.let {
+                        onNavigateToAddWord(it.setId)
+                    }
                 }
             }
         }

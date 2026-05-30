@@ -7,5 +7,6 @@ data class VocabularySetCreateState(
     val tagInput: String = "",
     val isLoading: Boolean = false,
     val success: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isEditMode: Boolean? = false
 )

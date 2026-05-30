@@ -16,22 +16,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +61,9 @@ fun VocabularySetListScreen(
     state: VocabularySetListState,
     onEvent: (VocabularySetListEvent) -> Unit
 ) {
+    var deleteSetId by remember {
+        mutableStateOf<String?>(null)
+    }
 
     Scaffold(
 
@@ -150,15 +161,28 @@ fun VocabularySetListScreen(
             items(state.vocabularySets) { set ->
 
                 VocabularySetCard(
-
                     set = set,
 
                     onClick = {
-
                         onEvent(
-                            VocabularySetListEvent
-                                .OnSetClick(set.id)
+                            VocabularySetListEvent.OnSetClick(set.id)
                         )
+                    },
+
+                    onLearnClick = {
+                        onEvent(
+                            VocabularySetListEvent.OnLearnClick(set.id)
+                        )
+                    },
+
+                    onEditClick = {
+                        onEvent(
+                            VocabularySetListEvent.OnEditClick(set.id)
+                        )
+                    },
+
+                    onDeleteClick = {
+                        deleteSetId = set.id
                     }
                 )
             }
@@ -167,49 +191,90 @@ fun VocabularySetListScreen(
                 Spacer(modifier = Modifier.height(100.dp))
             }
         }
+
+        deleteSetId?.let { setId ->
+
+            AlertDialog(
+
+                onDismissRequest = {
+                    deleteSetId = null
+                },
+
+                title = {
+                    Text("Delete Set")
+                },
+
+                text = {
+                    Text(
+                        "This action cannot be undone."
+                    )
+                },
+
+                confirmButton = {
+
+                    TextButton(
+                        onClick = {
+
+                            onEvent(
+                                VocabularySetListEvent
+                                    .OnDeleteClick(setId)
+                            )
+
+                            deleteSetId = null
+                        }
+                    ) {
+                        Text("Delete")
+                    }
+                },
+
+                dismissButton = {
+
+                    TextButton(
+                        onClick = {
+                            deleteSetId = null
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
     }
 }
 
 @Composable
 fun VocabularySetCard(
     set: VocabularySetUiModel,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLearnClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-
         shape = RoundedCornerShape(24.dp),
-
-        colors = CardDefaults.cardColors(
-            containerColor = CardColor
-        )
+        colors = CardDefaults.cardColors(containerColor = CardColor)
     ) {
+        Column(modifier = Modifier.padding(20.dp)) {
 
-        Column(
-            modifier = Modifier.padding(20.dp)
-        ) {
-
+            // HEADER ROW
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement =
-                    Arrangement.SpaceBetween,
-                verticalAlignment =
-                    Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
                 Box(
                     modifier = Modifier
                         .size(52.dp)
                         .clip(RoundedCornerShape(18.dp))
-                        .background(
-                            Primary.copy(alpha = 0.1f)
-                        ),
+                        .background(Primary.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
-
                     Icon(
                         imageVector = Icons.Default.MenuBook,
                         contentDescription = null,
@@ -217,24 +282,57 @@ fun VocabularySetCard(
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(
-                            Primary.copy(alpha = 0.1f)
-                        )
-                        .padding(
-                            horizontal = 12.dp,
-                            vertical = 6.dp
-                        )
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
 
-                    Text(
-                        text = "${set.totalWords} words",
-                        color = Primary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    // LEARN BUTTON (IMPORTANT CTA)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Primary)
+                            .clickable { onLearnClick() }
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            "Learn",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // MORE MENU
+                    Box {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .clickable { showMenu = true }
+                                .size(20.dp),
+                            tint = TextSecondary
+                        )
+
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Edit") },
+                                onClick = {
+                                    showMenu = false
+                                    onEditClick()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    showMenu = false
+                                    onDeleteClick()
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
@@ -242,9 +340,16 @@ fun VocabularySetCard(
 
             Text(
                 text = set.title,
-                color = TextPrimary,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                fontSize = 22.sp
+                color = TextPrimary
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "${set.totalWords} words",
+                color = TextSecondary
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -256,29 +361,16 @@ fun VocabularySetCard(
                     .height(8.dp)
                     .clip(RoundedCornerShape(100.dp)),
                 color = Primary,
-                trackColor =
-                    Primary.copy(alpha = 0.12f)
+                trackColor = Primary.copy(alpha = 0.12f)
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Text(
-                    text = "${(set.progress * 100).toInt()}%",
-                    color = Primary,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.width(6.dp))
-
-                Text(
-                    text = "completed",
-                    color = TextSecondary
-                )
-            }
+            Text(
+                text = "${(set.progress * 100).toInt()}% completed",
+                color = Primary,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

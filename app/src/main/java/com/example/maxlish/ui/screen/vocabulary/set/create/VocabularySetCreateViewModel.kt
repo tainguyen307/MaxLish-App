@@ -114,4 +114,23 @@ class VocabularySetCreateViewModel(
             }
         }
     }
+
+    fun loadSet(setId: String) {
+
+        viewModelScope.launch {
+
+            repository
+                .getVocabularySetById(setId)
+                .onSuccess { set ->
+
+                    _state.value =
+                        _state.value.copy(
+                            title = set.title,
+                            description = set.description,
+                            selectedTags = set.tags,
+                            isEditMode = true
+                        )
+                }
+        }
+    }
 }

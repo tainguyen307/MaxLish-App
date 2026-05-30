@@ -37,6 +37,12 @@ import com.example.maxlish.ui.screen.vocabulary.set.create.VocabularySetCreateVi
 import com.example.maxlish.ui.screen.vocabulary.set.detail.VocabularySetDetailRoute
 import com.example.maxlish.ui.screen.vocabulary.set.detail.VocabularySetDetailViewModel
 import com.example.maxlish.ui.screen.vocabulary.set.list.VocabularySetListRoute
+import com.example.maxlish.ui.screen.vocabulary.word.create.VocabularyWordCreateRoute
+import com.example.maxlish.ui.screen.vocabulary.word.create.VocabularyWordCreateViewModel
+import com.example.maxlish.ui.screen.vocabulary.word.detail.VocabularyWordDetailRoute
+import com.example.maxlish.ui.screen.vocabulary.word.detail.VocabularyWordDetailViewModel
+import com.example.maxlish.ui.screen.vocabulary.word.list.VocabularyWordListRoute
+import com.example.maxlish.ui.screen.vocabulary.word.list.VocabularyWordListViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 object AppDestinations {
@@ -50,10 +56,35 @@ object AppDestinations {
     const val VOCABULARY_CREATE = "vocabulary_create"
 
     const val VOCABULARY_DETAIL = "vocabulary_set_detail/{setId}"
+    const val VOCABULARY_EDIT = "vocabulary_set_edit/{setId}"
+    const val VOCABULARY_WORD_LIST = "vocabulary_word_list/{setId}"
+    const val VOCABULARY_WORD_CREATE = "vocabulary_word_create/{setId}?wordId={wordId}"
+    const val VOCABULARY_WORD_DETAIL = "vocabulary_word_detail/{setId}/{wordId}"
 
+    fun vocabularyWordList(setId: String) =
+        "vocabulary_word_list/$setId"
+    fun vocabularyWordCreate(
+        setId: String,
+        wordId: String? = null
+    ): String {
+
+        return if (wordId == null) {
+            "vocabulary_word_create/$setId"
+        } else {
+            "vocabulary_word_create/$setId?wordId=$wordId"
+        }
+    }
+    fun vocabularyWordDetail(
+        setId: String,
+        wordId: String
+    ): String =
+        "vocabulary_word_detail/$setId/$wordId"
     fun vocabularyDetail(setId: String): String {
         return "vocabulary_set_detail/$setId"
     }
+    fun vocabularyEdit(
+        setId: String
+    ) = "vocabulary_set_edit/$setId"
 }
 
 @Composable
@@ -321,6 +352,11 @@ fun AppNavGraph(
                         navController.navigate(
                             AppDestinations.VOCABULARY_CREATE
                         )
+                    },
+                    onNavigateToEdit = { setId ->
+                        navController.navigate(
+                            AppDestinations.vocabularyEdit(setId)
+                        )
                     }
                 )
             }
@@ -365,6 +401,45 @@ fun AppNavGraph(
             }
 
             composable(
+                route = AppDestinations.VOCABULARY_EDIT
+            ) { backStackEntry ->
+
+                val setId =
+                    backStackEntry.arguments
+                        ?.getString("setId")
+                        ?: ""
+
+                val currentUser =
+                    authRepository.getCurrentUser()
+
+                val viewModel: VocabularySetCreateViewModel =
+                    viewModel(
+                        factory = object : ViewModelProvider.Factory {
+
+                            override fun <T : ViewModel> create(
+                                modelClass: Class<T>
+                            ): T {
+
+                                @Suppress("UNCHECKED_CAST")
+
+                                return VocabularySetCreateViewModel(
+                                    repository = vocabularyRepository,
+                                    ownerId = currentUser?.uid ?: ""
+                                ) as T
+                            }
+                        }
+                    )
+
+                VocabularySetCreateRoute(
+                    setId = setId,
+                    viewModel = viewModel,
+                    onSuccess = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(
                 AppDestinations.VOCABULARY_DETAIL
             ) { backStackEntry ->
 
@@ -393,10 +468,173 @@ fun AppNavGraph(
                 VocabularySetDetailRoute(
                     setId = setId,
                     viewModel = viewModel,
+                    onNavigateToWordList = { id ->
+
+                        navController.navigate(
+                            AppDestinations.vocabularyWordList(id)
+                        )
+                    },
+
+                    onNavigateToAddWord = { id ->
+
+                        navController.navigate(
+                            AppDestinations.vocabularyWordCreate(id)
+                        ) {
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onNavigateToLearn = { id ->
+
+                        // tạm để sau
+                    },
+
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(
+                route = AppDestinations.VOCABULARY_WORD_LIST
+            ) { backStackEntry ->
+
+                val setId =
+                    backStackEntry.arguments?.getString("setId") ?: ""
+
+                val viewModel: VocabularyWordListViewModel =
+                    viewModel(
+                        factory = object : ViewModelProvider.Factory {
+
+                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+                                return VocabularyWordListViewModel(
+                                    repository = vocabularyRepository,
+                                    setId = setId
+                                ) as T
+                            }
+                        }
+                    )
+
+                VocabularyWordListRoute(
+
+                    viewModel = viewModel,
+
+                    onNavigateToDetail = { wordId ->
+
+                        navController.navigate(
+                            AppDestinations.vocabularyWordDetail(setId, wordId)
+                        )
+                    },
+
+                    onNavigateToCreate = {
+
+                        navController.navigate(
+                            AppDestinations.vocabularyWordCreate(setId)
+                        )
+                    }
+                )
+            }
+
+            composable(
+                route = AppDestinations.VOCABULARY_WORD_CREATE,
+                arguments = listOf(
+                    navArgument("setId") { defaultValue = "" },
+                    navArgument("wordId") {
+                        defaultValue = null
+                        nullable = true
+                    }
+                )
+
+            ) { backStackEntry ->
+
+                val setId =
+                    backStackEntry.arguments?.getString("setId") ?: ""
+
+                val wordId =
+                    backStackEntry.arguments?.getString("wordId")
+
+                val viewModel: VocabularyWordCreateViewModel =
+                    viewModel(
+                        factory = object : ViewModelProvider.Factory {
+
+                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+                                return VocabularyWordCreateViewModel(
+                                    repository = vocabularyRepository,
+                                    setId = setId,
+                                    wordId = wordId
+                                ) as T
+                            }
+                        }
+                    )
+
+                VocabularyWordCreateRoute(
+
+                    setId = setId,
+                    wordId = wordId,
+
+                    viewModel = viewModel,
+
+                    onSuccess = {
+                        navController.navigate(
+                            AppDestinations.vocabularyWordList(setId)
+                        ) {
+                            popUpTo(AppDestinations.VOCABULARY_WORD_LIST) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(
+                route = AppDestinations.VOCABULARY_WORD_DETAIL
+            ) { backStackEntry ->
+
+                val setId =
+                    backStackEntry.arguments?.getString("setId") ?: ""
+
+                val wordId =
+                    backStackEntry.arguments?.getString("wordId") ?: ""
+
+                val viewModel: VocabularyWordDetailViewModel =
+                    viewModel(
+                        factory = object : ViewModelProvider.Factory {
+
+                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+
+                                return VocabularyWordDetailViewModel(
+                                    repository = vocabularyRepository,
+                                    setId = setId,
+                                    wordId = wordId
+                                ) as T
+                            }
+                        }
+                    )
+
+                VocabularyWordDetailRoute(
+
+                    setId = setId,
+                    wordId = wordId,
+
+                    viewModel = viewModel,
+
                     onBack = {
                         navController.popBackStack()
                     },
-                    onStartLearning = { }
+
+                    onNavigateToEdit = { sId, wId ->
+
+                        navController.navigate(
+                            AppDestinations.vocabularyWordCreate(sId, wId)
+                        )
+                    }
                 )
             }
         }

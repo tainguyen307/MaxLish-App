@@ -33,6 +33,17 @@ class VocabularySetListViewModel : ViewModel() {
         loadVocabularySets()
     }
 
+    private fun deleteSet(setId: String) {
+
+        viewModelScope.launch {
+
+            repository
+                .deleteVocabularySet(setId)
+
+            loadVocabularySets()
+        }
+    }
+
     private fun loadVocabularySets() {
 
         viewModelScope.launch {
@@ -63,7 +74,7 @@ class VocabularySetListViewModel : ViewModel() {
                             id = it.setId,
                             title = it.title,
                             totalWords = it.wordCount,
-                            progress = 0.5f
+                            progress = 0F
                         )
                     }
 
@@ -106,6 +117,10 @@ class VocabularySetListViewModel : ViewModel() {
                         searchQuery = event.query,
                         vocabularySets = filtered
                     )
+            }
+
+            is VocabularySetListEvent.OnDeleteClick -> {
+                deleteSet(event.setId)
             }
 
             else -> Unit

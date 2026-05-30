@@ -24,6 +24,7 @@ coroutines = "1.10.2"
 googleServices = "4.4.2"
 firebaseFirestore = "26.3.0"
 playServicesAuthVersion = "21.2.0"
+runtime = "1.11.2"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -58,6 +59,7 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 play-services-auth-v2120 = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuthVersion" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
