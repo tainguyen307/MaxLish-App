@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 fun VocabularySetListRoute(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToCreate: () -> Unit,
+    onNavigateToEdit: (String) -> Unit,
     viewModel: VocabularySetListViewModel = viewModel()
 ) {
 
@@ -24,8 +25,12 @@ fun VocabularySetListRoute(
                     onNavigateToDetail(event.setId)
                 }
 
-                VocabularySetListEvent.OnCreateSetClick -> {
+                is VocabularySetListEvent.OnCreateSetClick -> {
                     onNavigateToCreate()
+                }
+
+                is VocabularySetListEvent.OnEditClick -> {
+                    onNavigateToEdit(event.setId)
                 }
 
                 else -> {

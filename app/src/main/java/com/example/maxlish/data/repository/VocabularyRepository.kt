@@ -37,6 +37,11 @@ interface VocabularyRepository {
         setId: String
     ): Result<List<VocabularyWord>>
 
+    suspend fun getWordById(
+        setId: String,
+        wordId: String
+    ): Result<VocabularyWord>
+
     suspend fun createWord(
         setId: String,
         word: VocabularyWord

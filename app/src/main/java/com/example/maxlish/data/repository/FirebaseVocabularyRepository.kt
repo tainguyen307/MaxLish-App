@@ -121,16 +121,31 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            setCollection
-                .document(setId)
-                .delete()
+            val words = firestore
+                .collection("vocabulary_words")
+                .whereEqualTo("setId", setId)
+                .get()
                 .await()
+
+            val batch = firestore.batch()
+
+            words.documents.forEach {
+                batch.delete(it.reference)
+            }
+
+            batch.delete(
+                firestore
+                    .collection("vocabulary_sets")
+                    .document(setId)
+            )
+
+            batch.commit().await()
 
             Result.success(Unit)
 
         } catch (e: Exception) {
-            Result.failure(e)
 
+            Result.failure(e)
         }
     }
 
@@ -157,6 +172,42 @@ class FirebaseVocabularyRepository(
             Result.success(words)
 
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getWordById(
+        setId: String,
+        wordId: String
+    ): Result<VocabularyWord> {
+
+        return try {
+
+            val doc = wordCollection(setId)
+                .document(wordId)
+                .get()
+                .await()
+
+            val data =
+                doc.toObject(VocabularyWord::class.java)
+
+            if (data != null) {
+
+                Result.success(
+                    data.copy(
+                        wordId = doc.id
+                    )
+                )
+
+            } else {
+
+                Result.failure(
+                    Exception("Word not found")
+                )
+            }
+
+        } catch (e: Exception) {
+
             Result.failure(e)
         }
     }
