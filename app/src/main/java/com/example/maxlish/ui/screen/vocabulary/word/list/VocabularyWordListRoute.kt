@@ -1,6 +1,7 @@
 package com.example.maxlish.ui.screen.vocabulary.word.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
@@ -15,6 +16,10 @@ fun VocabularyWordListRoute(
 ) {
 
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadWords()
+    }
 
     VocabularyWordListScreen(
 

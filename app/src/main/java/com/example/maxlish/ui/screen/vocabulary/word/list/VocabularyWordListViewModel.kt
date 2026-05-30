@@ -32,7 +32,7 @@ class VocabularyWordListViewModel(
         loadWords()
     }
 
-    private fun loadWords() {
+    fun loadWords() {
 
         viewModelScope.launch {
 

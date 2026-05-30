@@ -479,7 +479,9 @@ fun AppNavGraph(
 
                         navController.navigate(
                             AppDestinations.vocabularyWordCreate(id)
-                        )
+                        ) {
+                            launchSingleTop = true
+                        }
                     },
 
                     onNavigateToLearn = { id ->
@@ -535,7 +537,15 @@ fun AppNavGraph(
             }
 
             composable(
-                route = AppDestinations.VOCABULARY_WORD_CREATE + "?wordId={wordId}"
+                route = AppDestinations.VOCABULARY_WORD_CREATE,
+                arguments = listOf(
+                    navArgument("setId") { defaultValue = "" },
+                    navArgument("wordId") {
+                        defaultValue = null
+                        nullable = true
+                    }
+                )
+
             ) { backStackEntry ->
 
                 val setId =
@@ -567,7 +577,14 @@ fun AppNavGraph(
                     viewModel = viewModel,
 
                     onSuccess = {
-                        navController.popBackStack()
+                        navController.navigate(
+                            AppDestinations.vocabularyWordList(setId)
+                        ) {
+                            popUpTo(AppDestinations.VOCABULARY_WORD_LIST) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
                     },
 
                     onBack = {

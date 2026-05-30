@@ -2,7 +2,7 @@ package com.example.maxlish.ui.screen.vocabulary.word.detail
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -16,22 +16,48 @@ fun VocabularyWordDetailScreen(
 
     val word = state.word
 
-    if (state.isLoading) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
+    if (state.isLoading) {
         Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator()
         }
-
         return
     }
 
     if (word == null) {
-
         Box(modifier = Modifier.fillMaxSize()) {
             Text("Word not found")
         }
-
         return
+    }
+
+    // =========================
+    // DELETE CONFIRM DIALOG
+    // =========================
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete word?") },
+            text = { Text("This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onEvent(VocabularyWordDetailEvent.OnDeleteClick)
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     Column(
@@ -48,15 +74,12 @@ fun VocabularyWordDetailScreen(
         Spacer(Modifier.height(8.dp))
 
         Text("Meaning: ${word.meaning}")
-
         Spacer(Modifier.height(8.dp))
 
         Text("Pronunciation: ${word.pronunciation}")
-
         Spacer(Modifier.height(8.dp))
 
         Text("Example: ${word.example}")
-
         Spacer(Modifier.height(8.dp))
 
         Text("Difficulty: ${word.difficulty}")
@@ -67,9 +90,7 @@ fun VocabularyWordDetailScreen(
 
             Button(
                 onClick = {
-                    onEvent(
-                        VocabularyWordDetailEvent.OnEditClick
-                    )
+                    onEvent(VocabularyWordDetailEvent.OnEditClick)
                 }
             ) {
                 Text("Edit")
@@ -79,9 +100,7 @@ fun VocabularyWordDetailScreen(
 
             Button(
                 onClick = {
-                    onEvent(
-                        VocabularyWordDetailEvent.OnDeleteClick
-                    )
+                    showDeleteDialog = true
                 }
             ) {
                 Text("Delete")
@@ -92,9 +111,7 @@ fun VocabularyWordDetailScreen(
 
         TextButton(
             onClick = {
-                onEvent(
-                    VocabularyWordDetailEvent.OnBackClick
-                )
+                onEvent(VocabularyWordDetailEvent.OnBackClick)
             }
         ) {
             Text("Back")

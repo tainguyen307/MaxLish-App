@@ -34,6 +34,10 @@ fun VocabularyWordDetailRoute(
                     onNavigateToEdit(setId, wordId)
                 }
 
+                VocabularyWordDetailEvent.OnDeleteClick -> {
+                    onBack()
+                }
+
                 else -> {
                     viewModel.onEvent(event)
                 }

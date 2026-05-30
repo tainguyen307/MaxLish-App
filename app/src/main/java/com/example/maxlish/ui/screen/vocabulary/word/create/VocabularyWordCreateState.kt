@@ -1,7 +1,5 @@
 package com.example.maxlish.ui.screen.vocabulary.word.create
 
-import com.example.maxlish.data.model.VocabularyWord
-
 data class VocabularyWordCreateState(
 
     val isLoading: Boolean = false,

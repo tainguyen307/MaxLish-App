@@ -2,7 +2,10 @@ package com.example.maxlish.data.repository
 
 import com.example.maxlish.data.model.VocabularySet
 import com.example.maxlish.data.model.VocabularyWord
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebaseVocabularyRepository(
@@ -16,14 +19,36 @@ class FirebaseVocabularyRepository(
     private val setCollection =
         firestore.collection("vocabulary_sets")
 
-    private fun wordCollection(setId: String) =
-        firestore.collection("vocabulary_sets")
-            .document(setId)
-            .collection("words")
+    private val wordCollection =
+        firestore.collection("vocabulary_words")
 
     // ======================
     // SET
     // ======================
+
+    fun observeVocabularySets(userId: String) =
+        callbackFlow {
+
+            val listener =
+                firestore.collection("vocabulary_sets")
+                    .whereEqualTo("ownerId", userId)
+                    .addSnapshotListener { snapshot, error ->
+
+                        if (error != null) {
+                            close(error)
+                            return@addSnapshotListener
+                        }
+
+                        val sets =
+                            snapshot?.documents?.mapNotNull {
+                                it.toObject(VocabularySet::class.java)
+                            } ?: emptyList()
+
+                        trySend(sets)
+                    }
+
+            awaitClose { listener.remove() }
+        }
 
     override suspend fun getVocabularySets(
         ownerId: String
@@ -78,14 +103,13 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            val docRef = if (vocabularySet.setId.isBlank()) {
-                setCollection.document()
-            } else {
-                setCollection.document(vocabularySet.setId)
-            }
+            val docRef = setCollection.document()
 
             val finalData = vocabularySet.copy(
-                setId = docRef.id
+                setId = docRef.id,
+                wordCount = 0,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
             )
 
             docRef.set(finalData).await()
@@ -121,8 +145,8 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            val words = firestore
-                .collection("vocabulary_words")
+            // delete words first
+            val words = wordCollection
                 .whereEqualTo("setId", setId)
                 .get()
                 .await()
@@ -133,24 +157,19 @@ class FirebaseVocabularyRepository(
                 batch.delete(it.reference)
             }
 
-            batch.delete(
-                firestore
-                    .collection("vocabulary_sets")
-                    .document(setId)
-            )
+            batch.delete(setCollection.document(setId))
 
             batch.commit().await()
 
             Result.success(Unit)
 
         } catch (e: Exception) {
-
             Result.failure(e)
         }
     }
 
     // ======================
-    // WORD
+    // WORD (FLAT MODEL)
     // ======================
 
     override suspend fun getWordsBySetId(
@@ -159,13 +178,14 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            val snapshot = wordCollection(setId)
+            val snapshot = wordCollection
+                .whereEqualTo("setId", setId)
                 .get()
                 .await()
 
-            val words = snapshot.documents.mapNotNull { doc ->
-                doc.toObject(VocabularyWord::class.java)?.copy(
-                    wordId = doc.id
+            val words = snapshot.documents.mapNotNull {
+                it.toObject(VocabularyWord::class.java)?.copy(
+                    wordId = it.id
                 )
             }
 
@@ -183,31 +203,20 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            val doc = wordCollection(setId)
+            val doc = wordCollection
                 .document(wordId)
                 .get()
                 .await()
 
-            val data =
-                doc.toObject(VocabularyWord::class.java)
+            val data = doc.toObject(VocabularyWord::class.java)
 
             if (data != null) {
-
-                Result.success(
-                    data.copy(
-                        wordId = doc.id
-                    )
-                )
-
+                Result.success(data.copy(wordId = doc.id))
             } else {
-
-                Result.failure(
-                    Exception("Word not found")
-                )
+                Result.failure(Exception("Word not found"))
             }
 
         } catch (e: Exception) {
-
             Result.failure(e)
         }
     }
@@ -219,19 +228,21 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            val docRef = if (word.wordId.isBlank()) {
-                wordCollection(setId).document()
-            } else {
-                wordCollection(setId).document(word.wordId)
-            }
+            val docRef = wordCollection.document()
 
             val finalWord = word.copy(
-                wordId = docRef.id
+                wordId = docRef.id,
+                setId = setId,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
             )
 
             docRef.set(finalWord).await()
 
-            updateWordCount(setId)
+            // increment counter (SAFE + FAST)
+            setCollection.document(setId)
+                .update("wordCount", FieldValue.increment(1))
+                .await()
 
             Result.success(docRef.id)
 
@@ -247,7 +258,7 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            wordCollection(setId)
+            wordCollection
                 .document(word.wordId)
                 .set(word)
                 .await()
@@ -266,37 +277,20 @@ class FirebaseVocabularyRepository(
 
         return try {
 
-            wordCollection(setId)
+            wordCollection
                 .document(wordId)
                 .delete()
                 .await()
 
-            updateWordCount(setId)
+            // decrement counter
+            setCollection.document(setId)
+                .update("wordCount", FieldValue.increment(-1))
+                .await()
 
             Result.success(Unit)
 
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
-
-    // ======================
-    // HELPER
-    // ======================
-
-    private suspend fun updateWordCount(
-        setId: String
-    ) {
-
-        val snapshot = wordCollection(setId)
-            .get()
-            .await()
-
-        val count = snapshot.size()
-
-        setCollection
-            .document(setId)
-            .update("wordCount", count)
-            .await()
     }
 }
