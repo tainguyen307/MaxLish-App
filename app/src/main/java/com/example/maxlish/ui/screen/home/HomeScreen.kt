@@ -91,9 +91,7 @@ fun HomeScreen(
                     accuracy = state.accuracy,
                     reviewCount = state.reviewCount,
                     onContinueClick = {
-                        state.currentVocabularySetId?.let { id ->
-                            onEvent(HomeEvent.OnVocabularySetClick(id))
-                        }
+                        onEvent(HomeEvent.OnContinueLearningClick)
                     }
                 )
             }

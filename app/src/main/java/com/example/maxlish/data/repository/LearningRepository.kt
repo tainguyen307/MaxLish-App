@@ -1,6 +1,7 @@
 package com.example.maxlish.data.repository
 
 import com.example.maxlish.data.model.LearningProgress
+import com.example.maxlish.data.model.Review
 
 interface LearningRepository {
 
@@ -18,5 +19,9 @@ interface LearningRepository {
 
     suspend fun updateLearningProgress(
         progress: LearningProgress
+    ): Result<Unit>
+
+    suspend fun saveReview(
+        review: Review
     ): Result<Unit>
 }

@@ -1,6 +1,7 @@
 package com.example.maxlish.data.repository
 
 import com.example.maxlish.data.model.LearningProgress
+import com.example.maxlish.data.model.Review
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -10,6 +11,9 @@ class FirebaseLearningRepository(
 
     private val progressCollection =
         firestore.collection("learning_progress")
+
+    private val reviewCollection =
+        firestore.collection("reviews")
 
     override suspend fun getLearningProgress(
         userId: String
@@ -101,6 +105,30 @@ class FirebaseLearningRepository(
                 .document(progress.progressId)
                 .set(progress)
                 .await()
+
+            Result.success(Unit)
+
+        } catch (e: Exception) {
+
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun saveReview(
+        review: Review
+    ): Result<Unit> {
+
+        return try {
+
+            val docRef = if (review.reviewId.isBlank()) {
+                reviewCollection.document()
+            } else {
+                reviewCollection.document(review.reviewId)
+            }
+
+            val finalReview = review.copy(reviewId = docRef.id)
+
+            docRef.set(finalReview).await()
 
             Result.success(Unit)
 

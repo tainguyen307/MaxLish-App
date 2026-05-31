@@ -9,4 +9,5 @@ interface ProgressRepository {
     fun getUserStats(userId: String): Flow<User?>
     fun getStudySessions(userId: String): Flow<List<StudySession>>
     suspend fun saveStudySession(session: StudySession): Result<Unit>
+    suspend fun updateUserStats(user: User): Result<Unit>
 }

@@ -127,6 +127,51 @@ fun VocabularySetDetailScreen(
 
                 Text("View Words")
             }
+
+            // CSV ACTIONS Row
+            Spacer(modifier = Modifier.height(8.dp))
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        onEvent(VocabularySetDetailEvent.OnImportCsvClick)
+                    }
+                ) {
+                    Text("Import CSV")
+                }
+
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        onEvent(VocabularySetDetailEvent.OnExportCsvClick)
+                    }
+                ) {
+                    Text("Export CSV")
+                }
+            }
+
+            // Error/Success status message card
+            state.errorMessage?.let { msg ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (msg.contains("thành công")) MaterialTheme.colorScheme.primaryContainer 
+                                         else MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = msg,
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (msg.contains("thành công")) MaterialTheme.colorScheme.onPrimaryContainer 
+                                else MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
         }
     }
 }

@@ -14,7 +14,8 @@ import androidx.navigation.NavHostController
 fun HomeRoute(
     onNavigateToProfile: () -> Unit,
     onNavigateToProgress: () -> Unit,
-    onNavigateToVocabularySetDetail: (String) -> Unit
+    onNavigateToVocabularySetDetail: (String) -> Unit,
+    onNavigateToLearn: (String, String) -> Unit
 ) {
     val viewModel: HomeViewModel = viewModel()
     val state by viewModel.state.collectAsState()
@@ -39,6 +40,16 @@ fun HomeRoute(
                 HomeEvent.OnProgressClick -> onNavigateToProgress()
                 is HomeEvent.OnVocabularySetClick ->
                     onNavigateToVocabularySetDetail(event.setId)
+                HomeEvent.OnContinueLearningClick -> {
+                    state.currentVocabularySetId?.let { id ->
+                        onNavigateToLearn(id, "all")
+                    }
+                }
+                HomeEvent.OnReviewClick -> {
+                    state.currentVocabularySetId?.let { id ->
+                        onNavigateToLearn(id, "review")
+                    }
+                }
                 else -> viewModel.onEvent(event)
             }
         }

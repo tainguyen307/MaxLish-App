@@ -4,16 +4,34 @@ import com.example.maxlish.data.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
 class FirebaseAuthRepository : AuthRepository {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    private suspend fun checkAndCreateUserInFirestore(uid: String, email: String, displayName: String) {
+        val userDocRef = firestore.collection("users").document(uid)
+        val doc = userDocRef.get().await()
+        if (!doc.exists()) {
+            val newUser = User(
+                uid = uid,
+                email = email,
+                displayName = displayName,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            userDocRef.set(newUser).await()
+        }
+    }
 
     override suspend fun login(email: String, password: String): Result<User> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
             val firebaseUser = result.user ?: return Result.failure(Exception("Đăng nhập thất bại"))
+            checkAndCreateUserInFirestore(firebaseUser.uid, firebaseUser.email ?: "", firebaseUser.displayName ?: "")
             Result.success(
                 User(
                     uid = firebaseUser.uid,
@@ -39,6 +57,7 @@ class FirebaseAuthRepository : AuthRepository {
                 this.displayName = displayName
             }
             firebaseUser.updateProfile(profileUpdates).await()
+            checkAndCreateUserInFirestore(firebaseUser.uid, firebaseUser.email ?: "", displayName)
             Result.success(
                 User(
                     uid = firebaseUser.uid,
@@ -56,6 +75,7 @@ class FirebaseAuthRepository : AuthRepository {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val result = auth.signInWithCredential(credential).await()
             val firebaseUser = result.user ?: return Result.failure(Exception("Đăng nhập Google thất bại"))
+            checkAndCreateUserInFirestore(firebaseUser.uid, firebaseUser.email ?: "", firebaseUser.displayName ?: "")
             Result.success(
                 User(
                     uid = firebaseUser.uid,
@@ -93,7 +113,43 @@ class FirebaseAuthRepository : AuthRepository {
                 this.displayName = displayName
             }
             firebaseUser.updateProfile(profileUpdates).await()
-            // Lưu learningGoal và level vào SharedPreferences (vì Firebase Auth không có custom fields)
+
+            // Save to Firestore 'users' collection
+            val userDocRef = firestore.collection("users").document(firebaseUser.uid)
+            val docSnapshot = userDocRef.get().await()
+
+            val goalEnum = try {
+                com.example.maxlish.data.model.LearningGoal.valueOf(learningGoal)
+            } catch (e: Exception) {
+                com.example.maxlish.data.model.LearningGoal.IELTS
+            }
+
+            val levelEnum = try {
+                com.example.maxlish.data.model.UserLevel.valueOf(level)
+            } catch (e: Exception) {
+                com.example.maxlish.data.model.UserLevel.A1
+            }
+
+            val updatedUser = if (docSnapshot.exists()) {
+                val existingUser = docSnapshot.toObject(User::class.java)!!
+                existingUser.copy(
+                    displayName = displayName,
+                    learningGoal = goalEnum,
+                    level = levelEnum,
+                    updatedAt = System.currentTimeMillis()
+                )
+            } else {
+                User(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email ?: "",
+                    displayName = displayName,
+                    learningGoal = goalEnum,
+                    level = levelEnum,
+                    updatedAt = System.currentTimeMillis()
+                )
+            }
+
+            userDocRef.set(updatedUser).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

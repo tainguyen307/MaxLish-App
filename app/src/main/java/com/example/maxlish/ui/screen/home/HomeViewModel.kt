@@ -125,55 +125,61 @@ class HomeViewModel : ViewModel() {
 
                     val currentCourse = courses.firstOrNull()
 
-                    val progressList =
+                     val progressList =
                         learningRepository.getLearningProgress(userId)
                             .getOrNull() ?: emptyList()
 
-                    val totalCorrect =
+                     val dueReviews =
+                        learningRepository.getDueReviews(userId)
+                            .getOrNull() ?: emptyList()
+
+                     val totalCorrect =
                         progressList.sumOf { it.correctCount }
 
-                    val totalWrong =
+                     val totalWrong =
                         progressList.sumOf { it.wrongCount }
 
-                    val totalAnswers = totalCorrect + totalWrong
+                     val totalAnswers = totalCorrect + totalWrong
 
-                    val accuracy =
+                     val accuracy =
                         if (totalAnswers == 0) 0
                         else (totalCorrect * 100) / totalAnswers
 
-                    val masteredWords =
+                     val masteredWords =
                         progressList.count { it.mastered }
 
-                    _state.value = _state.value.copy(
+                     _state.value = _state.value.copy(
 
-                        isLoading = false,
+                         isLoading = false,
 
-                        userName = user?.displayName ?: "Learner 👋",
-                        streak = user?.streak ?: 0,
+                         userName = user?.displayName ?: "Learner 👋",
+                         streak = user?.streak ?: 0,
 
-                        reviewCount = 0, // nếu bạn chưa làm flow dueReviews
+                         reviewCount = dueReviews.size,
 
-                        currentCourseTitle =
-                            currentCourse?.title ?: "Start Learning",
+                         currentCourseTitle =
+                             currentCourse?.title ?: "Start Learning",
 
-                        currentLesson =
-                            "${currentCourse?.totalWords ?: 0} words",
+                         currentLesson =
+                             "${currentCourse?.totalWords ?: 0} words",
 
-                        remainingWords =
-                            (currentCourse?.totalWords ?: 0) -
-                                    ((currentCourse?.progress ?: 0f)
-                                            * (currentCourse?.totalWords ?: 0)).toInt(),
+                         remainingWords =
+                             (currentCourse?.totalWords ?: 0) -
+                                     ((currentCourse?.progress ?: 0f)
+                                             * (currentCourse?.totalWords ?: 0)).toInt(),
 
-                        learningProgress = currentCourse?.progress ?: 0f,
+                         learningProgress = currentCourse?.progress ?: 0f,
 
-                        earnedXp = masteredWords * 10,
+                         earnedXp = masteredWords * 10,
 
-                        accuracy = accuracy,
+                         accuracy = accuracy,
 
-                        weeklyActivity = buildWeeklyActivity(sessions),
+                         weeklyActivity = buildWeeklyActivity(sessions),
 
-                        vocabularySets = courses
-                    )
+                         vocabularySets = courses,
+                         currentVocabularySetId = currentCourse?.id,
+                         currentVocabularySetTitle = currentCourse?.title ?: "Start Learning"
+                     )
                 }
         }
     }

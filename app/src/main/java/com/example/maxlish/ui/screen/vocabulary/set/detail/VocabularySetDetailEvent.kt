@@ -9,4 +9,8 @@ sealed class VocabularySetDetailEvent {
     data object OnViewWordsClick : VocabularySetDetailEvent()
 
     data object OnAddWordClick : VocabularySetDetailEvent()
+
+    data object OnImportCsvClick : VocabularySetDetailEvent()
+
+    data object OnExportCsvClick : VocabularySetDetailEvent()
 }
