@@ -107,7 +107,7 @@ class HomeViewModel : ViewModel() {
 
                         val setProgress =
                             progressList.filter {
-                                it.wordId.startsWith(set.setId)
+                                it.setId == set.setId
                             }
 
                         val masteredWords =

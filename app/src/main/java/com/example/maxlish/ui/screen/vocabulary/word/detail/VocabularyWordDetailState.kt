@@ -8,5 +8,7 @@ data class VocabularyWordDetailState(
 
     val word: VocabularyWord? = null,
 
+    val isDeleted: Boolean = false,
+
     val errorMessage: String? = null
 )

@@ -60,20 +60,21 @@ class VocabularyWordDetailViewModel(
     }
 
     fun onEvent(event: VocabularyWordDetailEvent) {
-
         when (event) {
 
             VocabularyWordDetailEvent.OnDeleteClick -> {
 
                 viewModelScope.launch {
 
-                    val current =
-                        _state.value.word ?: return@launch
+                    val current = _state.value.word ?: return@launch
 
-                    repository.deleteWord(
-                        setId,
-                        current.wordId
-                    )
+                    val result = repository.deleteWord(setId, current.wordId)
+
+                    if (result.isSuccess) {
+                        _state.update {
+                            it.copy(isDeleted = true)
+                        }
+                    }
                 }
             }
 

@@ -5,6 +5,7 @@ data class LearningProgress(
     val progressId: String = "",
 
     val userId: String = "",
+    val setId: String = "",
     val wordId: String = "",
 
     // SM-2
