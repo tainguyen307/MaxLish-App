@@ -1,11 +1,13 @@
 package com.example.maxlish.ui.screen.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maxlish.data.model.StudySession
 import com.example.maxlish.data.repository.FirebaseLearningRepository
 import com.example.maxlish.data.repository.FirebaseProgressRepository
 import com.example.maxlish.data.repository.FirebaseVocabularyRepository
+import com.example.maxlish.data.seed.SeedData
 import com.example.maxlish.ui.screen.home.model.VocabularySetUiModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -51,12 +53,22 @@ class HomeViewModel : ViewModel() {
         if (userId.isNotBlank()) {
 
             // =========================
-            // 1. REALTIME VOCAB SETS
+            // 1. REALTIME VOCAB SETS (TỰ ĐỘNG SEED KHI RỖNG)
             // =========================
             viewModelScope.launch {
                 vocabularyRepository.observeVocabularySets(userId)
                     .collect { sets ->
-                        setsFlow.value = sets
+                        if (sets.isEmpty()) {
+                            try {
+                                val email = auth.currentUser?.email ?: "newuser@example.com"
+                                Log.d("AUTO_SEED", "Chưa có dữ liệu. Tiến hành tự động nạp dữ liệu mẫu cho $userId...")
+                                SeedData().seedForUser(userId, email)
+                            } catch (e: Exception) {
+                                Log.e("AUTO_SEED", "Lỗi nạp dữ liệu tự động: ${e.message}")
+                            }
+                        } else {
+                            setsFlow.value = sets
+                        }
                     }
             }
 
