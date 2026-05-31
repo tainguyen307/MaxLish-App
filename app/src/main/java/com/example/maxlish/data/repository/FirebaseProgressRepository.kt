@@ -56,4 +56,13 @@ class FirebaseProgressRepository(instance: FirebaseFirestore) : ProgressReposito
             Result.failure(e)
         }
     }
+
+    override suspend fun updateUserStats(user: User): Result<Unit> {
+        return try {
+            firestore.collection("users").document(user.uid).set(user).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

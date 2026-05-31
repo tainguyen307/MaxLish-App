@@ -24,8 +24,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.maxlish.data.repository.FirebaseAuthRepository
+import com.example.maxlish.data.repository.FirebaseLearningRepository
 import com.example.maxlish.data.repository.FirebaseProgressRepository
 import com.example.maxlish.data.repository.FirebaseVocabularyRepository
+import com.example.maxlish.ui.screen.learning.LearningRoute
+import com.example.maxlish.ui.screen.learning.LearningViewModel
 import com.example.maxlish.ui.screen.home.HomeRoute
 import com.example.maxlish.ui.screen.login.LoginScreen
 import com.example.maxlish.ui.screen.profile.ProfileRoute
@@ -85,6 +88,10 @@ object AppDestinations {
     fun vocabularyEdit(
         setId: String
     ) = "vocabulary_set_edit/$setId"
+
+    const val LEARN = "learn/{setId}?mode={mode}"
+    fun learn(setId: String, mode: String = "all") =
+        "learn/$setId?mode=$mode"
 }
 
 @Composable
@@ -304,6 +311,10 @@ fun AppNavGraph(
 
                     onNavigateToVocabularySetDetail = { setId ->
                         navController.navigate(AppDestinations.vocabularyDetail(setId))
+                    },
+
+                    onNavigateToLearn = { setId, mode ->
+                        navController.navigate(AppDestinations.learn(setId, mode))
                     }
                 )
             }
@@ -485,8 +496,7 @@ fun AppNavGraph(
                     },
 
                     onNavigateToLearn = { id ->
-
-                        // tạm để sau
+                        navController.navigate(AppDestinations.learn(id, "all"))
                     },
 
                     onBack = {
@@ -634,6 +644,43 @@ fun AppNavGraph(
                         navController.navigate(
                             AppDestinations.vocabularyWordCreate(sId, wId)
                         )
+                    }
+                )
+            }
+
+            composable(
+                route = AppDestinations.LEARN,
+                arguments = listOf(
+                    navArgument("setId") { defaultValue = "" },
+                    navArgument("mode") { defaultValue = "all" }
+                )
+            ) { backStackEntry ->
+                val setId = backStackEntry.arguments?.getString("setId") ?: ""
+                val mode = backStackEntry.arguments?.getString("mode") ?: "all"
+
+                val learningRepository = FirebaseLearningRepository(firestore)
+                val progressRepository = FirebaseProgressRepository(firestore)
+
+                val viewModel: LearningViewModel = viewModel(
+                    factory = object : ViewModelProvider.Factory {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                            @Suppress("UNCHECKED_CAST")
+                            return LearningViewModel(
+                                setId = setId,
+                                mode = mode,
+                                authRepository = authRepository,
+                                learningRepository = learningRepository,
+                                progressRepository = progressRepository,
+                                vocabularyRepository = vocabularyRepository
+                            ) as T
+                        }
+                    }
+                )
+
+                LearningRoute(
+                    viewModel = viewModel,
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
