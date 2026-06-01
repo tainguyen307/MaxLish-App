@@ -1,6 +1,8 @@
 package com.example.maxlish.ui.screen.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,14 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,9 +25,8 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,11 +38,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.unit.sp
 import com.example.maxlish.data.model.LearningGoal
 import com.example.maxlish.data.model.UserLevel
+import com.example.maxlish.ui.component.DuoButton
+import com.example.maxlish.ui.component.DuoCard
+import com.example.maxlish.ui.component.DuoColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +66,9 @@ fun ProfileScreen(
         }
     }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        containerColor = DuoColors.Background
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -70,31 +78,50 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(36.dp))
 
-            // Avatar
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Avatar",
-                modifier = Modifier.size(96.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Hồ sơ của bạn",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold
+            // Avatar Container
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .background(DuoColors.Blue.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Avatar",
+                    modifier = Modifier.size(84.dp),
+                    tint = DuoColors.Blue
                 )
-            )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            
             Text(
-                text = "Thiết lập mục tiêu học để bắt đầu",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Hồ sơ cá nhân",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = DuoColors.TextPrimary
+            )
+            
+            Spacer(modifier = Modifier.height(2.dp))
+            
+            Text(
+                text = "Thiết lập mục tiêu và trình độ học tập",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = DuoColors.TextSecondary
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
-            Card(modifier = Modifier.fillMaxWidth()) {
+            // Form 3D Card
+            DuoCard(
+                backgroundColor = DuoColors.White,
+                borderColor = DuoColors.Border,
+                shadowHeight = 5.dp,
+                shape = RoundedCornerShape(24.dp)
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -105,13 +132,21 @@ fun ProfileScreen(
                         value = state.displayName,
                         onValueChange = { onEvent(ProfileEvent.NameChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Tên hiển thị") },
+                        label = { Text("Tên hiển thị", fontWeight = FontWeight.Bold) },
                         leadingIcon = {
-                            Icon(imageVector = Icons.Default.Person, contentDescription = null)
+                            Icon(imageVector = Icons.Default.Person, contentDescription = null, tint = DuoColors.TextSecondary)
                         },
                         singleLine = true,
                         isError = state.errorMessage != null,
-                        supportingText = state.errorMessage?.let { { Text(it) } }
+                        supportingText = state.errorMessage?.let { { Text(it, fontWeight = FontWeight.Bold) } },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = DuoColors.Blue,
+                            unfocusedBorderColor = DuoColors.Border,
+                            errorBorderColor = DuoColors.Red,
+                            focusedLabelColor = DuoColors.Blue,
+                            unfocusedLabelColor = DuoColors.TextSecondary
+                        )
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -129,10 +164,17 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                            label = { Text("Mục tiêu học") },
+                            label = { Text("Mục tiêu học", fontWeight = FontWeight.Bold) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = goalExpanded)
-                            }
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = DuoColors.Blue,
+                                unfocusedBorderColor = DuoColors.Border,
+                                focusedLabelColor = DuoColors.Blue,
+                                unfocusedLabelColor = DuoColors.TextSecondary
+                            )
                         )
                         ExposedDropdownMenu(
                             expanded = goalExpanded,
@@ -140,7 +182,7 @@ fun ProfileScreen(
                         ) {
                             LearningGoal.entries.forEach { goal ->
                                 DropdownMenuItem(
-                                    text = { Text(goal.displayName) },
+                                    text = { Text(goal.displayName, fontWeight = FontWeight.Bold, color = DuoColors.TextPrimary) },
                                     onClick = {
                                         onEvent(ProfileEvent.GoalChanged(goal))
                                         goalExpanded = false
@@ -165,10 +207,17 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                            label = { Text("Trình độ hiện tại") },
+                            label = { Text("Trình độ hiện tại", fontWeight = FontWeight.Bold) },
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = levelExpanded)
-                            }
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = DuoColors.Blue,
+                                unfocusedBorderColor = DuoColors.Border,
+                                focusedLabelColor = DuoColors.Blue,
+                                unfocusedLabelColor = DuoColors.TextSecondary
+                            )
                         )
                         ExposedDropdownMenu(
                             expanded = levelExpanded,
@@ -176,7 +225,7 @@ fun ProfileScreen(
                         ) {
                             UserLevel.entries.forEach { lvl ->
                                 DropdownMenuItem(
-                                    text = { Text(lvl.name) },
+                                    text = { Text(lvl.name, fontWeight = FontWeight.Bold, color = DuoColors.TextPrimary) },
                                     onClick = {
                                         onEvent(ProfileEvent.LevelChanged(lvl))
                                         levelExpanded = false
@@ -186,48 +235,55 @@ fun ProfileScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
-                    // Nút Lưu
-                    Button(
+                    // Nút Lưu 3D Green
+                    DuoButton(
                         onClick = { onEvent(ProfileEvent.SaveClicked) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        enabled = !state.isLoading
+                        backgroundColor = DuoColors.Green,
+                        bottomColor = DuoColors.GreenDark,
+                        enabled = !state.isLoading,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         if (state.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                strokeWidth = 2.dp
+                                color = Color.White,
+                                strokeWidth = 2.5.dp
                             )
                         } else {
-                            Text("Lưu hồ sơ", style = MaterialTheme.typography.labelLarge)
+                            Text(
+                                text = "Lưu hồ sơ", 
+                                color = Color.White,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 16.sp
+                            )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                    // Nút Đăng xuất
-                    OutlinedButton(
+                    // Nút Đăng xuất 3D White (Border/Text Red)
+                    DuoButton(
                         onClick = {
                             onEvent(ProfileEvent.LogoutClicked)
                             onLogout()
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
+                        backgroundColor = DuoColors.White,
+                        bottomColor = DuoColors.WhiteDark,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Đăng xuất", style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            text = "Đăng xuất", 
+                            color = DuoColors.Red,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 15.sp
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(36.dp))
         }
     }
 }
