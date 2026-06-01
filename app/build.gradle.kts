@@ -76,4 +76,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.play.services.auth)
     implementation(libs.firebase.firestore)
+    dependencies {
+        implementation(libs.androidx.work.runtime.ktx)
+    }
 }

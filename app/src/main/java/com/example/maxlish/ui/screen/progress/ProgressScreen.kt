@@ -396,6 +396,8 @@ fun DailyActivityChart(
 
                 val days =
                     listOf("M", "T", "W", "T", "F", "S", "S")
+                val todayIndex = (java.util.Calendar.getInstance()
+                    .get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7
 
                 values.forEachIndexed { index, value ->
 
@@ -419,7 +421,8 @@ fun DailyActivityChart(
                                     )
                                 )
                                 .background(
-                                    if (index == values.lastIndex)
+
+                                    if (index == todayIndex)
                                         Primary
                                     else
                                         Primary.copy(alpha = 0.22f)

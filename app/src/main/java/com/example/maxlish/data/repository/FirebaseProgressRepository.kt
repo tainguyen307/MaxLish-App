@@ -1,5 +1,6 @@
 package com.example.maxlish.data.repository
 
+import com.example.maxlish.data.model.LearningProgress
 import com.example.maxlish.data.model.StudySession
 import com.example.maxlish.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
@@ -63,6 +64,21 @@ class FirebaseProgressRepository(instance: FirebaseFirestore) : ProgressReposito
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun getDueWords(userId: String): List<LearningProgress> {
+
+        val now = System.currentTimeMillis()
+
+        val snapshot = firestore.collection("learning_progress")
+            .whereEqualTo("userId", userId)
+            .whereLessThanOrEqualTo("nextReviewAt", now)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull {
+            it.toObject(LearningProgress::class.java)
         }
     }
 }
