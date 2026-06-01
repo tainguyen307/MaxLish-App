@@ -1,6 +1,7 @@
 package com.example.maxlish.ui.screen.progress
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
@@ -27,13 +27,15 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -152,15 +154,115 @@ fun ProgressScreen(
                 }
 
                 item {
-                    DailyActivityChart(uiState.studySessions)
+                    DailyActivityChart(uiState.weeklyActivity)
                 }
-                
+
+                item {
+                    SectionTitle(title = "Recent Sessions")
+                }
+
+                if (uiState.studySessions.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(140.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = CardColor)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No study sessions yet. Start a learning session to see progress.",
+                                    color = TextSecondary,
+                                    modifier = Modifier.padding(24.dp)
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    items(uiState.studySessions.takeLast(4).reversed()) { session ->
+                        SessionCard(session = session)
+                    }
+                }
+
                 item {
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }
     }
+}
+
+@Composable
+fun SessionCard(session: StudySession) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = CardColor)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = formatSessionDate(session.startedAt),
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "${session.reviewedWords} words reviewed",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = TextPrimary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${session.correctAnswers} correct · ${session.wrongAnswers} wrong",
+                    color = TextSecondary,
+                    fontSize = 14.sp
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = "${session.durationMinutes} min",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Primary
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(Primary.copy(alpha = 0.14f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = if (session.correctAnswers + session.wrongAnswers == 0) "N/A"
+                        else "${((session.correctAnswers.toFloat() / (session.correctAnswers + session.wrongAnswers)) * 100).toInt()}%",
+                        color = Primary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun formatSessionDate(timestamp: Long): String {
+    val formatter = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault())
+    return formatter.format(Date(timestamp))
 }
 
 @Composable
@@ -266,17 +368,24 @@ fun LevelCard(level: String, category: String) {
 }
 
 @Composable
-fun DailyActivityChart(sessions: List<StudySession>) {
+fun DailyActivityChart(
+    values: List<Int>
+) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp),
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = CardColor)
+        colors = CardDefaults.cardColors(
+            containerColor = CardColor
+        )
     ) {
+
         Column(
             modifier = Modifier.padding(22.dp)
         ) {
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -284,32 +393,46 @@ fun DailyActivityChart(sessions: List<StudySession>) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-                // Giả lập dữ liệu biểu đồ giống HomeScreen
-                // Trong thực tế sẽ tính toán dựa trên sessions
-                val values = if (sessions.isEmpty()) {
-                    listOf(40, 65, 30, 90, 55, 70, 100)
-                } else {
-                    // Placeholder logic: map session durations or counts to heights
-                    sessions.takeLast(7).map { (it.durationMinutes * 5).coerceIn(10, 150) }
-                }
-                val days = listOf("M", "T", "W", "T", "F", "S", "S")
+
+                val days =
+                    listOf("M", "T", "W", "T", "F", "S", "S")
+                val todayIndex = (java.util.Calendar.getInstance()
+                    .get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7
 
                 values.forEachIndexed { index, value ->
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
+
                         Box(
                             modifier = Modifier
                                 .width(28.dp)
-                                .height(value.dp)
-                                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                                .height(
+                                    value
+                                        .coerceAtLeast(8)
+                                        .dp
+                                )
+                                .clip(
+                                    RoundedCornerShape(
+                                        topStart = 12.dp,
+                                        topEnd = 12.dp
+                                    )
+                                )
                                 .background(
-                                    if (index == values.lastIndex) Primary
-                                    else Primary.copy(alpha = 0.22f)
+
+                                    if (index == todayIndex)
+                                        Primary
+                                    else
+                                        Primary.copy(alpha = 0.22f)
                                 )
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Spacer(
+                            modifier = Modifier.height(8.dp)
+                        )
+
                         Text(
                             text = days[index],
                             color = TextSecondary,

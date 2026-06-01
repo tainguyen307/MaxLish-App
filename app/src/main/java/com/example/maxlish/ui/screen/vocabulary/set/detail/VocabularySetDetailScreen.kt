@@ -159,16 +159,16 @@ fun VocabularySetDetailScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (msg.contains("thành công")) MaterialTheme.colorScheme.primaryContainer 
-                                         else MaterialTheme.colorScheme.errorContainer
+                        containerColor = if (msg.contains("thành công")) MaterialTheme.colorScheme.primaryContainer
+                        else MaterialTheme.colorScheme.errorContainer
                     )
                 ) {
                     Text(
                         text = msg,
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (msg.contains("thành công")) MaterialTheme.colorScheme.onPrimaryContainer 
-                                else MaterialTheme.colorScheme.onErrorContainer
+                        color = if (msg.contains("thành công")) MaterialTheme.colorScheme.onPrimaryContainer
+                        else MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
             }
