@@ -1,6 +1,7 @@
 package com.example.maxlish.ui.screen.vocabulary.word.detail
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 
@@ -18,6 +19,12 @@ fun VocabularyWordDetailRoute(
 
     val state by viewModel.state.collectAsState()
 
+    LaunchedEffect(state.isDeleted) {
+        if (state.isDeleted) {
+            onBack()
+        }
+    }
+
     VocabularyWordDetailScreen(
 
         state = state,
@@ -32,10 +39,6 @@ fun VocabularyWordDetailRoute(
 
                 VocabularyWordDetailEvent.OnEditClick -> {
                     onNavigateToEdit(setId, wordId)
-                }
-
-                VocabularyWordDetailEvent.OnDeleteClick -> {
-                    onBack()
                 }
 
                 else -> {

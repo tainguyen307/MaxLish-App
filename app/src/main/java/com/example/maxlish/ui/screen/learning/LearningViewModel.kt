@@ -149,6 +149,7 @@ class LearningViewModel(
         val existingProgress = state.value.progressMap[word.wordId] ?: LearningProgress(
             progressId = UUID.randomUUID().toString(),
             userId = userId,
+            setId = word.setId,
             wordId = word.wordId
         )
 
