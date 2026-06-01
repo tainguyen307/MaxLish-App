@@ -3,14 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     id("com.google.gms.google-services")
+    alias(libs.plugins.kotlin.android)
 }
 android {
     namespace = "com.example.maxlish"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.maxlish"
@@ -39,10 +36,14 @@ android {
         compose = true
         viewBinding = true
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

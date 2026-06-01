@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.1"
+agp = "8.11.0"
 coreKtx = "1.10.1"
 firebaseBomVersion = "33.1.0"
 junit = "4.13.2"
@@ -24,6 +24,8 @@ coroutines = "1.10.2"
 googleServices = "4.4.2"
 firebaseFirestore = "26.3.0"
 playServicesAuthVersion = "21.2.0"
+runtime = "1.11.2"
+coreKtxVersion = "1.18.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -58,9 +60,12 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 play-services-auth-v2120 = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuthVersion" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "runtime" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtxVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 

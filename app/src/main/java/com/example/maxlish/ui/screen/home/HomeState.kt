@@ -1,22 +1,29 @@
 package com.example.maxlish.ui.screen.home
 
-import com.example.maxlish.ui.screen.home.model.CourseUiModel
+import com.example.maxlish.ui.screen.home.model.VocabularySetUiModel
 
 data class HomeState(
 
     val isLoading: Boolean = false,
 
-    val userName: String = "Tai",
+    val userName: String = "",
+    val streak: Int = 0,
 
-    val streak: Int = 15,
+    val reviewCount: Int = 0,
 
-    val reviewCount: Int = 42,
+    val currentCourseTitle: String = "",
+    val currentLesson: String = "",
+    val remainingWords: Int = 0,
+    val learningProgress: Float = 0f,
 
-    val todayLearned: Int = 25,
+    val earnedXp: Int = 0,
+    val accuracy: Int = 0,
 
-    val todayGoal: Int = 50,
+    val weeklyActivity: List<Int> = emptyList(),
 
-    val courses: List<CourseUiModel> = emptyList(),
+    val errorMessage: String? = null,
 
-    val error: String? = null
+    val vocabularySets: List<VocabularySetUiModel> = emptyList(),
+    val currentVocabularySetId: String? = null,
+    val currentVocabularySetTitle: String = ""
 )

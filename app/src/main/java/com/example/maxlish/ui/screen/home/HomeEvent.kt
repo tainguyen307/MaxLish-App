@@ -10,7 +10,9 @@ sealed interface HomeEvent {
 
     data object OnDailyChallengeClick : HomeEvent
 
-    data class OnCourseClick(
-        val courseId: String
+    data class OnVocabularySetClick(
+        val setId: String
     ) : HomeEvent
+
+    data object OnProgressClick : HomeEvent
 }
