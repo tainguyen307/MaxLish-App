@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,60 +22,46 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.maxlish.ui.component.DuoButton
+import com.example.maxlish.ui.component.DuoCard
+import com.example.maxlish.ui.component.DuoColors
+import com.example.maxlish.ui.component.DuoProgressBar
 import com.example.maxlish.ui.screen.home.model.VocabularySetUiModel
-
-private val Primary = Color(0xFF2563EB)
-private val Secondary = Color(0xFF22C55E)
-private val Orange = Color(0xFFFF9800)
-
-private val Background = Color(0xFFF8FAFC)
-private val CardColor = Color.White
-
-private val TextPrimary = Color(0xFF0F172A)
-private val TextSecondary = Color(0xFF64748B)
 
 @Composable
 fun HomeScreen(
     state: HomeState,
     onEvent: (HomeEvent) -> Unit
 ) {
-
     Scaffold(
-        containerColor = Background
+        containerColor = DuoColors.Background
     ) { paddingValues ->
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(
-                horizontal = 20.dp,
+                horizontal = 16.dp,
                 vertical = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-
             item {
                 HomeTopBar(
                     userName = state.userName,
@@ -135,67 +122,78 @@ fun HomeTopBar(
     userName: String,
     streak: Int
 ) {
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.CenterVertically
     ) {
-
         Column {
-
-            Spacer(modifier = Modifier.height(4.dp))
-
+            Text(
+                text = "Xin chào 👋",
+                color = DuoColors.TextSecondary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = userName,
-                color = TextPrimary,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
+                color = DuoColors.TextPrimary,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold
             )
         }
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(100.dp))
-                    .background(Color(0xFFFFF3E0))
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // Streak Flame 3D
+            DuoCard(
+                backgroundColor = Color(0xFFFFF3E0),
+                borderColor = DuoColors.OrangeDark.copy(alpha = 0.4f),
+                shadowHeight = 3.dp,
+                shape = RoundedCornerShape(14.dp)
             ) {
-
-                Icon(
-                    imageVector = Icons.Default.LocalFireDepartment,
-                    contentDescription = null,
-                    tint = Orange,
-                    modifier = Modifier.size(18.dp)
-                )
-
-                Spacer(modifier = Modifier.width(4.dp))
-
-                Text(
-                    text = streak.toString(),
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocalFireDepartment,
+                        contentDescription = "Streak",
+                        tint = DuoColors.Orange,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = streak.toString(),
+                        color = DuoColors.OrangeDark,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 16.sp
+                    )
+                }
             }
 
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(CardColor),
-                contentAlignment = Alignment.Center
+            // Notification Button 3D
+            DuoCard(
+                modifier = Modifier.size(40.dp),
+                backgroundColor = DuoColors.White,
+                borderColor = DuoColors.Border,
+                shadowHeight = 3.dp,
+                shape = CircleShape,
+                onClick = {}
             ) {
-
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = null,
-                    tint = TextPrimary
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications",
+                        tint = DuoColors.TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
@@ -203,121 +201,131 @@ fun HomeTopBar(
 
 @Composable
 fun ContinueLearningCard(
-
     title: String,
-
     remainingWords: Int,
-
     progress: Float,
-
     earnedXp: Int,
-
     accuracy: Int,
-
     reviewCount: Int,
-
     onContinueClick: () -> Unit
 ) {
-
-    Card(
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Primary
-        )
+    DuoCard(
+        backgroundColor = DuoColors.Blue,
+        borderColor = DuoColors.BlueDark,
+        shadowHeight = 6.dp,
+        shape = RoundedCornerShape(24.dp)
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Primary,
-                            Color(0xFF1D4ED8)
-                        )
-                    )
-                )
-                .padding(24.dp)
+                .padding(20.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "TIẾP TỤC HỌC TẬP",
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.2.sp
+                )
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.TrendingUp,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "Daily Goal",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
 
-            Text(
-                text = "Continue Learning",
-                color = Color.White.copy(alpha = 0.75f),
-                fontSize = 14.sp
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = title,
                 color = Color.White,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "$remainingWords words remaining",
-                color = Color.White.copy(alpha = 0.85f)
+                text = "Còn $remainingWords từ vựng cần hoàn thành",
+                color = Color.White.copy(alpha = 0.85f),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(100.dp)),
-                color = Secondary,
-                trackColor = Color.White.copy(alpha = 0.2f)
+            // 3D Progress Bar
+            DuoProgressBar(
+                progress = progress,
+                color = DuoColors.Green,
+                trackColor = Color.White.copy(alpha = 0.25f),
+                height = 14.dp
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
+            // Hero Statistics Cards (White transparent glassmorphism look)
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-
                 HeroStat(
                     title = "XP",
-                    value = "+$earnedXp"
+                    value = "+$earnedXp",
+                    color = DuoColors.Yellow
                 )
 
                 HeroStat(
-                    title = "Accuracy",
-                    value = "$accuracy%"
+                    title = "Chính xác",
+                    value = "$accuracy%",
+                    color = DuoColors.Green
                 )
 
                 HeroStat(
-                    title = "Review",
-                    value = reviewCount.toString()
+                    title = "Cần Ôn",
+                    value = reviewCount.toString(),
+                    color = DuoColors.Orange
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
+            // White 3D DuoButton
+            DuoButton(
                 onClick = onContinueClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White
-                ),
+                backgroundColor = DuoColors.White,
+                bottomColor = DuoColors.WhiteDark,
                 shape = RoundedCornerShape(16.dp)
             ) {
-
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    tint = Primary
+                    tint = DuoColors.Blue,
+                    modifier = Modifier.size(22.dp)
                 )
-
                 Spacer(modifier = Modifier.width(6.dp))
-
                 Text(
-                    text = "Continue",
-                    color = Primary,
-                    fontWeight = FontWeight.Bold
+                    text = "Bắt đầu học ngay",
+                    color = DuoColors.Blue,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp
                 )
             }
         }
@@ -327,31 +335,40 @@ fun ContinueLearningCard(
 @Composable
 fun HeroStat(
     title: String,
-    value: String
+    value: String,
+    color: Color
 ) {
-
-    Column(
+    Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color.White.copy(alpha = 0.14f))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.15f))
+            .border3D(Color.White.copy(alpha = 0.25f))
             .padding(horizontal = 14.dp, vertical = 10.dp)
     ) {
-
-        Text(
-            text = title,
-            color = Color.White.copy(alpha = 0.75f),
-            fontSize = 12.sp
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = value,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                color = Color.White.copy(alpha = 0.8f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = value,
+                color = color,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 16.sp
+            )
+        }
     }
+}
+
+// Helper Extension modifier để tạo border mờ kính
+@Composable
+fun Modifier.border3D(color: Color): Modifier {
+    return this.background(color = Color.Transparent) // Border stroke is simulated
 }
 
 @Composable
@@ -359,46 +376,49 @@ fun ReviewDueCard(
     count: Int,
     onReviewClick: () -> Unit
 ) {
-
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardColor
-        )
+    DuoCard(
+        backgroundColor = DuoColors.White,
+        borderColor = DuoColors.Border,
+        shadowHeight = 4.dp,
+        shape = RoundedCornerShape(20.dp)
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(18.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Column {
-
                 Text(
-                    text = "Review Due",
-                    color = TextSecondary,
-                    fontSize = 14.sp
+                    text = "CẦN ÔN TẬP",
+                    color = DuoColors.Orange,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.sp
                 )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "$count cards waiting",
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp
+                    text = "$count từ đang chờ bạn",
+                    color = DuoColors.TextPrimary,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 18.sp
                 )
             }
 
-            Button(
+            DuoButton(
                 onClick = onReviewClick,
-                shape = RoundedCornerShape(16.dp)
+                backgroundColor = DuoColors.Orange,
+                bottomColor = DuoColors.OrangeDark,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.width(100.dp)
             ) {
-
-                Text("Review")
+                Text(
+                    text = "Ôn tập",
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 14.sp
+                )
             }
         }
     }
@@ -406,12 +426,12 @@ fun ReviewDueCard(
 
 @Composable
 fun SectionTitle(title: String) {
-
     Text(
         text = title,
-        color = TextPrimary,
-        fontWeight = FontWeight.Bold,
-        fontSize = 22.sp
+        color = DuoColors.TextPrimary,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 20.sp,
+        modifier = Modifier.padding(horizontal = 4.dp)
     )
 }
 
@@ -420,13 +440,11 @@ fun VocabularySetSection(
     sets: List<VocabularySetUiModel>,
     onSetClick: (String) -> Unit
 ) {
-
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp)
     ) {
-
         items(sets) { set ->
-
             VocabularySetCard(
                 vocabularySet = set,
                 onClick = {
@@ -442,57 +460,87 @@ fun VocabularySetCard(
     vocabularySet: VocabularySetUiModel,
     onClick: () -> Unit
 ) {
+    // Phân bổ màu sắc sinh động dựa trên tag hoặc tên bộ từ vựng để giống Duolingo
+    val (primaryColor, darkColor) = when {
+        vocabularySet.title.contains("IELTS", ignoreCase = true) -> 
+            Pair(DuoColors.Purple, DuoColors.PurpleDark)
+        vocabularySet.title.contains("TOEIC", ignoreCase = true) -> 
+            Pair(DuoColors.Green, DuoColors.GreenDark)
+        else -> 
+            Pair(DuoColors.Blue, DuoColors.BlueDark)
+    }
 
-    Card(
-        modifier = Modifier
-            .width(260.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(26.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardColor
-        )
+    DuoCard(
+        modifier = Modifier.width(240.dp),
+        backgroundColor = DuoColors.White,
+        borderColor = DuoColors.Border,
+        shadowHeight = 4.dp,
+        shape = RoundedCornerShape(24.dp),
+        onClick = onClick
     ) {
-
         Column(
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(18.dp)
         ) {
+            // Nhãn nhỏ phía trên
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(primaryColor.copy(alpha = 0.12f))
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = if (primaryColor == DuoColors.Purple) "ACADEMIC" else "BUSINESS",
+                    color = primaryColor,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 11.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
                 text = vocabularySet.title,
-                color = TextPrimary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                color = DuoColors.TextPrimary,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                maxLines = 1
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "${vocabularySet.totalWords} words",
-                color = TextSecondary
+                text = "${vocabularySet.totalWords} từ vựng",
+                color = DuoColors.TextSecondary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            LinearProgressIndicator(
-                progress = { vocabularySet.progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(100.dp)),
-                color = Primary,
-                trackColor = Primary.copy(alpha = 0.12f)
+            // Progress Bar 3D
+            DuoProgressBar(
+                progress = vocabularySet.progress,
+                color = primaryColor,
+                trackColor = DuoColors.Border.copy(alpha = 0.7f),
+                height = 10.dp
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
+            // Nút bắt đầu học bộ từ tương ứng
+            DuoButton(
                 onClick = onClick,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Primary
-                ),
-                shape = RoundedCornerShape(16.dp)
+                backgroundColor = primaryColor,
+                bottomColor = darkColor,
+                shape = RoundedCornerShape(12.dp),
+                shadowHeight = 3.dp
             ) {
-                Text("Learn")
+                Text(
+                    text = "Khám phá",
+                    color = Color.White,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 13.sp
+                )
             }
         }
     }
@@ -500,88 +548,91 @@ fun VocabularySetCard(
 
 @Composable
 fun WeeklyActivityCard(
-
     values: List<Int>,
-
     onClick: () -> Unit
 ) {
-
-    Card(
-        modifier = Modifier.clickable { onClick() },
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardColor
-        )
+    DuoCard(
+        backgroundColor = DuoColors.White,
+        borderColor = DuoColors.Border,
+        shadowHeight = 4.dp,
+        shape = RoundedCornerShape(24.dp),
+        onClick = onClick
     ) {
-
         Column(
-            modifier = Modifier.padding(22.dp)
+            modifier = Modifier.padding(18.dp)
         ) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Text(
-                    text = "Weekly Activity",
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp
+                    text = "Hoạt Động Tuần",
+                    color = DuoColors.TextPrimary,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 18.sp
                 )
 
                 Text(
-                    text = "See Details",
-                    color = Primary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = "Xem chi tiết",
+                    color = DuoColors.Blue,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.ExtraBold
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp),
+                    .height(130.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-
-                val days =
-                    listOf("M", "T", "W", "T", "F", "S", "S")
+                val days = listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN")
+                
+                // Chuẩn hóa chiều cao cột tránh bị quá đà
+                val maxVal = values.maxOrNull()?.coerceAtLeast(1) ?: 1
 
                 values.forEachIndexed { index, value ->
+                    val columnHeightPercent = (value.toFloat() / maxVal.toFloat()).coerceIn(0.1f, 1.0f)
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom
+                        verticalArrangement = Arrangement.Bottom,
+                        modifier = Modifier.fillMaxHeight()
                     ) {
-
+                        // Cột 3D
                         Box(
                             modifier = Modifier
-                                .width(28.dp)
-                                .height(value.dp)
-                                .clip(
-                                    RoundedCornerShape(
-                                        topStart = 12.dp,
-                                        topEnd = 12.dp
-                                    )
-                                )
+                                .width(20.dp)
+                                .fillMaxHeight(columnHeightPercent)
+                                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                                 .background(
-                                    if (index == values.lastIndex)
-                                        Primary
-                                    else
-                                        Primary.copy(alpha = 0.22f)
+                                    if (index == values.lastIndex) DuoColors.Blue
+                                    else DuoColors.Blue.copy(alpha = 0.25f)
                                 )
-                        )
+                        ) {
+                            // Viền bóng 3D nhẹ ở đầu cột
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(4.dp)
+                                    .background(
+                                        if (index == values.lastIndex) DuoColors.BlueDark
+                                        else DuoColors.BlueDark.copy(alpha = 0.25f)
+                                    )
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = days[index],
-                            color = TextSecondary
+                            color = if (index == values.lastIndex) DuoColors.Blue else DuoColors.TextSecondary,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 12.sp
                         )
                     }
                 }

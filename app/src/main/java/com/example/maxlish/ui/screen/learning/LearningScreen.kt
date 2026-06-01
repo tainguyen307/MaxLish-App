@@ -24,7 +24,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
@@ -35,8 +34,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -57,19 +54,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maxlish.data.model.ReviewQuality
 import com.example.maxlish.data.model.VocabularyWord
-
-private val Primary = Color(0xFF2563EB)
-private val Secondary = Color(0xFF22C55E)
-private val Orange = Color(0xFFFF9800)
-private val Background = Color(0xFFF8FAFC)
-private val CardColor = Color.White
-private val TextPrimary = Color(0xFF0F172A)
-private val TextSecondary = Color(0xFF64748B)
-
-private val AgainColor = Color(0xFFEF4444)
-private val HardColor = Color(0xFFF97316)
-private val GoodColor = Color(0xFF3B82F6)
-private val EasyColor = Color(0xFF10B981)
+import com.example.maxlish.ui.component.DuoButton
+import com.example.maxlish.ui.component.DuoCard
+import com.example.maxlish.ui.component.DuoColors
+import com.example.maxlish.ui.component.DuoProgressBar
 
 @Composable
 fun LearningRoute(
@@ -93,16 +81,16 @@ fun LearningScreen(
     onBack: () -> Unit
 ) {
     Scaffold(
-        containerColor = Background,
+        containerColor = DuoColors.Background,
         topBar = {
             TopAppBar(
                 title = {
                     Column {
                         Text(
                             text = state.setName,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 18.sp,
-                            color = TextPrimary
+                            color = DuoColors.TextPrimary
                         )
                         Text(
                             text = when (state.mode) {
@@ -111,17 +99,23 @@ fun LearningScreen(
                                 else -> "Daily Plan - Học & Ôn tập"
                             },
                             fontSize = 12.sp,
-                            color = TextSecondary
+                            color = DuoColors.TextSecondary,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = TextPrimary)
+                        Icon(
+                            imageVector = Icons.Default.Close, 
+                            contentDescription = "Close", 
+                            tint = DuoColors.TextPrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Background
+                    containerColor = DuoColors.Background
                 )
             )
         }
@@ -136,7 +130,7 @@ fun LearningScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Primary)
+                    CircularProgressIndicator(color = DuoColors.Green)
                 }
             } else if (state.errorMessage != null && state.queue.isEmpty()) {
                 Column(
@@ -149,35 +143,41 @@ fun LearningScreen(
                     Icon(
                         imageVector = Icons.Default.School,
                         contentDescription = null,
-                        tint = Primary,
-                        modifier = Modifier.size(72.dp)
+                        tint = DuoColors.Blue,
+                        modifier = Modifier.size(80.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                     Text(
                         text = state.errorMessage,
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextPrimary,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = DuoColors.TextPrimary,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(24.dp))
-                    Button(
+                    
+                    DuoButton(
                         onClick = onBack,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                        backgroundColor = DuoColors.Blue,
+                        bottomColor = DuoColors.BlueDark,
+                        modifier = Modifier.width(160.dp)
                     ) {
-                        Text("Quay lại")
+                        Text(
+                            text = "Quay lại",
+                            color = Color.White,
+                            fontWeight = FontWeight.ExtraBold
+                        )
                     }
                 }
             } else {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // 1. Progress Bar
+                    // 1. 3D DuoProgressBar
                     val progressValue = if (state.queue.isNotEmpty()) {
                         state.currentIndex.toFloat() / state.queue.size.toFloat()
                     } else 0f
@@ -188,34 +188,33 @@ fun LearningScreen(
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Đã hoàn thành ${state.currentIndex}/${state.queue.size}",
-                                color = TextSecondary,
-                                fontSize = 14.sp
+                                text = "Tiến độ: ${state.currentIndex}/${state.queue.size}",
+                                color = DuoColors.TextSecondary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = "${(progressValue * 100).toInt()}%",
-                                color = Primary,
-                                fontWeight = FontWeight.Bold,
+                                color = DuoColors.Green,
+                                fontWeight = FontWeight.ExtraBold,
                                 fontSize = 14.sp
                             )
                         }
 
-                        LinearProgressIndicator(
-                            progress = { progressValue },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(100.dp)),
-                            color = Primary,
-                            trackColor = Primary.copy(alpha = 0.12f)
+                        DuoProgressBar(
+                            progress = progressValue,
+                            color = DuoColors.Green,
+                            trackColor = DuoColors.Border.copy(alpha = 0.7f),
+                            height = 14.dp
                         )
                     }
 
                     // 2. Flashcard with 3D flip animation
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     state.currentWord?.let { word ->
                         Flashcard(
                             word = word,
@@ -224,82 +223,95 @@ fun LearningScreen(
                             modifier = Modifier.weight(1f)
                         )
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // 3. SM-2 Quality Buttons or Tap Hint
                     if (state.isFlipped) {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Text(
                                 text = "Bạn nhớ từ này ở mức độ nào?",
-                                color = TextSecondary,
+                                color = DuoColors.TextSecondary,
                                 fontSize = 14.sp,
                                 modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Bold
                             )
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                QualityButton(
+                                QualityButton3D(
                                     modifier = Modifier.weight(1f),
                                     text = "Again",
                                     description = "Quên",
-                                    color = AgainColor,
+                                    color = DuoColors.Red,
+                                    darkColor = DuoColors.RedDark,
                                     onClick = { onEvent(LearningEvent.RateCard(ReviewQuality.AGAIN)) }
                                 )
-                                QualityButton(
+                                QualityButton3D(
                                     modifier = Modifier.weight(1f),
                                     text = "Hard",
                                     description = "Khó",
-                                    color = HardColor,
+                                    color = DuoColors.Orange,
+                                    darkColor = DuoColors.OrangeDark,
                                     onClick = { onEvent(LearningEvent.RateCard(ReviewQuality.HARD)) }
                                 )
-                                QualityButton(
+                                QualityButton3D(
                                     modifier = Modifier.weight(1f),
                                     text = "Good",
                                     description = "Nhớ",
-                                    color = GoodColor,
+                                    color = DuoColors.Blue,
+                                    darkColor = DuoColors.BlueDark,
                                     onClick = { onEvent(LearningEvent.RateCard(ReviewQuality.GOOD)) }
                                 )
-                                QualityButton(
+                                QualityButton3D(
                                     modifier = Modifier.weight(1f),
                                     text = "Easy",
-                                    description = "Rất dễ",
-                                    color = EasyColor,
+                                    description = "Dễ",
+                                    color = DuoColors.Green,
+                                    darkColor = DuoColors.GreenDark,
                                     onClick = { onEvent(LearningEvent.RateCard(ReviewQuality.EASY)) }
                                 )
                             }
                         }
                     } else {
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(100.dp))
-                                .background(Primary.copy(alpha = 0.08f))
-                                .clickable { onEvent(LearningEvent.FlipCard) }
-                                .padding(horizontal = 24.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                        // Hint tap card with 3D button-like look
+                        DuoCard(
+                            backgroundColor = DuoColors.White,
+                            borderColor = DuoColors.Border,
+                            shadowHeight = 3.dp,
+                            shape = RoundedCornerShape(100.dp),
+                            onClick = { onEvent(LearningEvent.FlipCard) },
+                            modifier = Modifier.fillMaxWidth(0.9f)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Loop,
-                                contentDescription = null,
-                                tint = Primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Chạm vào thẻ để lật xem nghĩa",
-                                color = Primary,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 15.sp
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Loop,
+                                    contentDescription = null,
+                                    tint = DuoColors.Blue,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Chạm vào thẻ để lật xem nghĩa",
+                                    color = DuoColors.Blue,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 15.sp
+                                )
+                            }
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
 
@@ -332,38 +344,38 @@ fun Flashcard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .padding(vertical = 8.dp)
             .graphicsLayer {
                 rotationY = rotation
                 cameraDistance = 14 * density
             }
             .clickable { onFlip() },
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = CardColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(containerColor = DuoColors.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(2.dp, DuoColors.Border)
     ) {
         if (rotation <= 90f) {
             // FRONT CONTENT
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(32.dp),
+                    .padding(24.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(70.dp)
                         .clip(CircleShape)
-                        .background(Primary.copy(alpha = 0.08f)),
+                        .background(DuoColors.Blue.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.School,
                         contentDescription = null,
-                        tint = Primary,
-                        modifier = Modifier.size(28.dp)
+                        tint = DuoColors.Blue,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
 
@@ -371,44 +383,51 @@ fun Flashcard(
 
                 Text(
                     text = word.word,
-                    color = TextPrimary,
-                    fontSize = 36.sp,
+                    color = DuoColors.TextPrimary,
+                    fontSize = 38.sp,
                     fontWeight = FontWeight.ExtraBold,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     text = word.pronunciation,
-                    color = Orange,
+                    color = DuoColors.Orange,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(28.dp))
                 
-                Text(
-                    text = word.difficulty,
+                Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(100.dp))
                         .background(
                             when (word.difficulty) {
-                                "Easy" -> Secondary.copy(alpha = 0.12f)
-                                "Hard" -> AgainColor.copy(alpha = 0.12f)
-                                else -> Orange.copy(alpha = 0.12f)
+                                "Easy" -> DuoColors.Green.copy(alpha = 0.15f)
+                                "Hard" -> DuoColors.Red.copy(alpha = 0.15f)
+                                else -> DuoColors.Orange.copy(alpha = 0.15f)
                             }
                         )
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                    color = when (word.difficulty) {
-                        "Easy" -> Secondary
-                        "Hard" -> AgainColor
-                        else -> Orange
-                    },
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
-                )
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = when (word.difficulty) {
+                            "Easy" -> "DỄ"
+                            "Hard" -> "KHÓ"
+                            else -> "TRUNG BÌNH"
+                        },
+                        color = when (word.difficulty) {
+                            "Easy" -> DuoColors.GreenDark
+                            "Hard" -> DuoColors.RedDark
+                            else -> DuoColors.OrangeDark
+                        },
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 12.sp
+                    )
+                }
             }
         } else {
             // BACK CONTENT
@@ -418,13 +437,13 @@ fun Flashcard(
                     .graphicsLayer {
                         rotationY = 180f
                     }
-                    .padding(24.dp)
+                    .padding(20.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     // Header of card back
                     Row(
@@ -433,137 +452,156 @@ fun Flashcard(
                     ) {
                         Text(
                             text = word.word,
-                            color = TextPrimary,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
+                            color = DuoColors.TextPrimary,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.ExtraBold
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = word.pronunciation,
-                            color = TextSecondary,
-                            fontSize = 14.sp
-                        )
-                    }
-
-                    // Meaning
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Secondary.copy(alpha = 0.08f))
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = "Định nghĩa:",
-                            color = Secondary,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = word.meaning,
-                            color = TextPrimary,
-                            fontSize = 20.sp,
+                            color = DuoColors.TextSecondary,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    // Description (English)
-                    if (word.description.isNotBlank()) {
-                        Column {
+                    // Meaning Block (Green Accent)
+                    DuoCard(
+                        backgroundColor = DuoColors.Green.copy(alpha = 0.08f),
+                        borderColor = DuoColors.Green.copy(alpha = 0.25f),
+                        shadowHeight = 3.dp,
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp)
+                        ) {
                             Text(
-                                text = "English Definition",
-                                color = TextSecondary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
+                                text = "ĐỊNH NGHĨA",
+                                color = DuoColors.GreenDark,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 11.sp,
+                                letterSpacing = 1.sp
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = word.description,
-                                color = TextPrimary,
-                                fontSize = 15.sp,
-                                fontStyle = FontStyle.Italic
+                                text = word.meaning,
+                                color = DuoColors.TextPrimary,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.ExtraBold
                             )
                         }
                     }
 
-                    // Example
-                    if (word.example.isNotBlank()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Background)
-                                .padding(16.dp)
-                        ) {
+                    // Description (English)
+                    if (word.description.isNotBlank()) {
+                        Column(modifier = Modifier.padding(horizontal = 4.dp)) {
                             Text(
-                                text = "Ví dụ:",
-                                color = Primary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
+                                text = "ENGLISH DEFINITION",
+                                color = DuoColors.TextSecondary,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 11.sp,
+                                letterSpacing = 1.sp
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "\"${word.example}\"",
-                                color = TextPrimary,
+                                text = word.description,
+                                color = DuoColors.TextPrimary,
                                 fontSize = 15.sp,
+                                fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Medium
                             )
                         }
                     }
 
+                    // Example Block (Blue Accent)
+                    if (word.example.isNotBlank()) {
+                        DuoCard(
+                            backgroundColor = DuoColors.Blue.copy(alpha = 0.08f),
+                            borderColor = DuoColors.Blue.copy(alpha = 0.25f),
+                            shadowHeight = 3.dp,
+                            shape = RoundedCornerShape(18.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(14.dp)
+                            ) {
+                                Text(
+                                    text = "VÍ DỤ THỰC TẾ",
+                                    color = DuoColors.BlueDark,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 11.sp,
+                                    letterSpacing = 1.sp
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = "\"${word.example}\"",
+                                    color = DuoColors.TextPrimary,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+
                     // Collocation & Related Words
                     if (word.collocations.isNotEmpty()) {
-                        Column {
+                        Column(modifier = Modifier.padding(horizontal = 4.dp)) {
                             Text(
-                                text = "Collocations",
-                                color = TextSecondary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
+                                text = "COLLOCATIONS",
+                                color = DuoColors.TextSecondary,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 11.sp,
+                                letterSpacing = 1.sp
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 word.collocations.forEach { col ->
-                                    Text(
-                                        text = col,
+                                    Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(100.dp))
-                                            .background(Color(0xFFE2E8F0))
-                                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                                        color = TextPrimary,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(DuoColors.Border.copy(alpha = 0.7f))
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = col,
+                                            color = DuoColors.TextPrimary,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.ExtraBold
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
 
                     if (word.relatedWords.isNotEmpty()) {
-                        Column {
+                        Column(modifier = Modifier.padding(horizontal = 4.dp)) {
                             Text(
-                                text = "Từ liên quan",
-                                color = TextSecondary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
+                                text = "TỪ LIÊN QUAN",
+                                color = DuoColors.TextSecondary,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 11.sp,
+                                letterSpacing = 1.sp
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 word.relatedWords.forEach { rel ->
-                                    Text(
-                                        text = rel,
+                                    Box(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(100.dp))
-                                            .background(Primary.copy(alpha = 0.08f))
-                                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                                        color = Primary,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(DuoColors.Purple.copy(alpha = 0.12f))
+                                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    ) {
+                                        Text(
+                                            text = rel,
+                                            color = DuoColors.Purple,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.ExtraBold
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -571,18 +609,20 @@ fun Flashcard(
 
                     // Notes
                     if (word.note.isNotBlank()) {
-                        Column {
+                        Column(modifier = Modifier.padding(horizontal = 4.dp)) {
                             Text(
-                                text = "Ghi chú cá nhân",
-                                color = TextSecondary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
+                                text = "GHI CHÚ CÁ NHÂN",
+                                color = DuoColors.TextSecondary,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 11.sp,
+                                letterSpacing = 1.sp
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = word.note,
-                                color = TextPrimary,
-                                fontSize = 14.sp
+                                color = DuoColors.TextPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
@@ -593,38 +633,38 @@ fun Flashcard(
 }
 
 @Composable
-fun QualityButton(
+fun QualityButton3D(
     modifier: Modifier = Modifier,
     text: String,
     description: String,
     color: Color,
+    darkColor: Color,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = modifier
-            .height(72.dp)
-            .clickable { onClick() },
+    DuoButton(
+        onClick = onClick,
+        backgroundColor = color,
+        bottomColor = darkColor,
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f)),
-        border = BorderStroke(1.5.dp, color.copy(alpha = 0.3f))
+        shadowHeight = 4.dp,
+        modifier = modifier.height(68.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = text,
-                color = color,
+                color = Color.White,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = 15.sp
+                fontSize = 14.sp
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(1.dp))
             Text(
                 text = description,
-                color = color.copy(alpha = 0.8f),
+                color = Color.White.copy(alpha = 0.85f),
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -640,29 +680,28 @@ fun SummaryOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
+            .background(Color.Black.copy(alpha = 0.6f))
             .clickable(enabled = false) {},
         contentAlignment = Alignment.Center
     ) {
-        Card(
+        DuoCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(32.dp),
-            shape = RoundedCornerShape(32.dp),
-            colors = CardDefaults.cardColors(containerColor = CardColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+                .padding(24.dp),
+            backgroundColor = DuoColors.White,
+            borderColor = DuoColors.Border,
+            shadowHeight = 6.dp,
+            shape = RoundedCornerShape(32.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
+                modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp)
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Trophy Icon with micro-animation look
+                // Trophy/Celebration Icon
                 Box(
                     modifier = Modifier
-                        .size(90.dp)
+                        .size(80.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.radialGradient(
@@ -677,83 +716,92 @@ fun SummaryOverlay(
                     Icon(
                         imageVector = Icons.Default.Celebration,
                         contentDescription = null,
-                        tint = Orange,
-                        modifier = Modifier.size(48.dp)
+                        tint = DuoColors.Orange,
+                        modifier = Modifier.size(44.dp)
                     )
                 }
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = "Tuyệt vời!",
-                        color = TextPrimary,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        text = "TUYỆT VỜI!",
+                        color = DuoColors.GreenDark,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp
                     )
                     Text(
-                        text = "Bạn đã hoàn thành phiên học tập ngày hôm nay.",
-                        color = TextSecondary,
+                        text = "Bạn đã hoàn thành phiên học hôm nay",
+                        color = DuoColors.TextSecondary,
                         fontSize = 14.sp,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                // Stats Dashboard Grid
-                Row(
+                // Stats Dashboard DuoCard Grid
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    SummaryStatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "XP nhận được",
-                        value = "+$xpEarned",
-                        color = Orange
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        SummaryStatCard3D(
+                            modifier = Modifier.weight(1f),
+                            label = "XP NHẬN ĐƯỢC",
+                            value = "+$xpEarned",
+                            color = DuoColors.Orange
+                        )
 
-                    val accuracy = if (correctCount + wrongCount > 0) {
-                        (correctCount * 100) / (correctCount + wrongCount)
-                    } else 100
-                    SummaryStatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Độ chính xác",
-                        value = "$accuracy%",
-                        color = Secondary
-                    )
+                        val accuracy = if (correctCount + wrongCount > 0) {
+                            (correctCount * 100) / (correctCount + wrongCount)
+                        } else 100
+                        SummaryStatCard3D(
+                            modifier = Modifier.weight(1f),
+                            label = "ĐỘ CHÍNH XÁC",
+                            value = "$accuracy%",
+                            color = DuoColors.Green
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        SummaryStatCard3D(
+                            modifier = Modifier.weight(1f),
+                            label = "TRẢ LỜI ĐÚNG",
+                            value = "$correctCount",
+                            color = DuoColors.Blue
+                        )
+
+                        SummaryStatCard3D(
+                            modifier = Modifier.weight(1f),
+                            label = "CẦN ÔN LẠI",
+                            value = "$wrongCount",
+                            color = DuoColors.Red
+                        )
+                    }
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    SummaryStatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Trả lời đúng",
-                        value = "$correctCount",
-                        color = Primary
-                    )
+                Spacer(modifier = Modifier.height(4.dp))
 
-                    SummaryStatCard(
-                        modifier = Modifier.weight(1f),
-                        label = "Cần ôn tập lại",
-                        value = "$wrongCount",
-                        color = AgainColor
-                    )
-                }
-
-                Button(
+                // Green DuoButton
+                DuoButton(
                     onClick = onComplete,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
+                    backgroundColor = DuoColors.Green,
+                    bottomColor = DuoColors.GreenDark,
                     shape = RoundedCornerShape(18.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Hoàn thành",
+                        text = "Hoàn thành phiên học",
                         color = Color.White,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         fontSize = 16.sp
                     )
                 }
@@ -763,27 +811,28 @@ fun SummaryOverlay(
 }
 
 @Composable
-fun SummaryStatCard(
+fun SummaryStatCard3D(
     modifier: Modifier = Modifier,
     label: String,
     value: String,
     color: Color
 ) {
-    Card(
+    DuoCard(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Background),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+        backgroundColor = DuoColors.Background,
+        borderColor = DuoColors.Border,
+        shadowHeight = 3.dp,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = label,
-                color = TextSecondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
+                color = DuoColors.TextSecondary,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.ExtraBold
             )
             Text(
                 text = value,
