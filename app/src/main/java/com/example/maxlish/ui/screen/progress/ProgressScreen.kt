@@ -144,7 +144,7 @@ fun ProgressScreen(
 
                 item {
                     LevelCard(
-                        level = uiState.user?.level?.name ?: "A1",
+                        level = uiState.user?.level ?: "A1",
                         category = viewModel.getLevelCategory()
                     )
                 }

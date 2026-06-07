@@ -158,7 +158,7 @@ class ProgressViewModel(
             _uiState.value.user
                 ?: return "Beginner"
 
-        return when (user.level.name) {
+        return when (user.level) {
 
             "A1", "A2" ->
                 "Beginner"

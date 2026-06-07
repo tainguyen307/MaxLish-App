@@ -6,6 +6,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,11 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import com.example.maxlish.ui.component.DuoButton
 import com.example.maxlish.ui.component.DuoCard
 import com.example.maxlish.ui.component.DuoColors
@@ -126,7 +130,7 @@ fun VocabularySetCreateScreen(
                 }
             }
 
-            // Tags card
+            // Tags card — InlineChipTextField
             DuoCard(
                 backgroundColor = DuoColors.White,
                 borderColor = DuoColors.Border,
@@ -139,100 +143,15 @@ fun VocabularySetCreateScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "NHÃN (TAGS)",
-                        color = DuoColors.TextSecondary,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 11.sp,
-                        letterSpacing = 1.sp
+                    InlineChipTextField(
+                        title = "Nhãn (Tags)",
+                        inputValue = state.tagInput,
+                        onInputValueChange = { onEvent(VocabularySetCreateEvent.OnTagInputChange(it)) },
+                        onAddChip = { onEvent(VocabularySetCreateEvent.OnAddTag) },
+                        items = state.selectedTags,
+                        onRemoveItem = { onEvent(VocabularySetCreateEvent.OnRemoveTag(it)) },
+                        placeholder = "Ví dụ: giao tiếp, IELTS, cơ bản..."
                     )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = state.tagInput,
-                            onValueChange = {
-                                onEvent(VocabularySetCreateEvent.OnTagInputChange(it))
-                            },
-                            placeholder = {
-                                Text(
-                                    text = "Thêm nhãn...",
-                                    color = DuoColors.TextSecondary.copy(alpha = 0.6f),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = DuoColors.Blue,
-                                unfocusedBorderColor = DuoColors.Border,
-                                focusedContainerColor = DuoColors.White,
-                                unfocusedContainerColor = DuoColors.White,
-                                cursorColor = DuoColors.Blue,
-                                focusedTextColor = DuoColors.TextPrimary,
-                                unfocusedTextColor = DuoColors.TextPrimary
-                            ),
-                            textStyle = LocalTextStyle.current.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp
-                            )
-                        )
-
-                        DuoButton(
-                            onClick = { onEvent(VocabularySetCreateEvent.OnAddTag) },
-                            backgroundColor = DuoColors.Blue,
-                            bottomColor = DuoColors.BlueDark,
-                            shape = RoundedCornerShape(14.dp),
-                            shadowHeight = 3.dp
-                        ) {
-                            Text(
-                                text = "Thêm",
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 14.sp
-                            )
-                        }
-                    }
-
-                    if (state.selectedTags.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            state.selectedTags.forEach { tag ->
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(DuoColors.Border.copy(alpha = 0.7f))
-                                        .clickable { onEvent(VocabularySetCreateEvent.OnRemoveTag(tag)) }
-                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Text(
-                                            text = tag,
-                                            color = DuoColors.TextPrimary,
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.ExtraBold
-                                        )
-                                        Text(
-                                            text = "×",
-                                            color = DuoColors.TextSecondary,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
 
@@ -324,3 +243,115 @@ fun DuoTextField(
         )
     }
 }
+
+// =============================================================
+// INLINE CHIP TEXT FIELD — dùng cho Tags, Collocations, Related
+// Gõ Enter hoặc dấu phẩy để tự động thêm chip, không cần nút
+// =============================================================
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun InlineChipTextField(
+    title: String,
+    inputValue: String,
+    onInputValueChange: (String) -> Unit,
+    onAddChip: () -> Unit,
+    items: List<String>,
+    onRemoveItem: (String) -> Unit,
+    placeholder: String = ""
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title.uppercase(),
+            color = DuoColors.TextSecondary,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 11.sp,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        OutlinedTextField(
+            value = inputValue,
+            onValueChange = { newValue ->
+                // Tự động thêm chip khi gõ dấu phẩy
+                if (newValue.endsWith(",")) {
+                    onInputValueChange(newValue.dropLast(1).trim())
+                    onAddChip()
+                } else {
+                    onInputValueChange(newValue)
+                }
+            },
+            placeholder = {
+                Text(
+                    text = placeholder,
+                    color = DuoColors.TextSecondary.copy(alpha = 0.55f),
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp
+                )
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = { onAddChip() }
+            ),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = DuoColors.Blue,
+                unfocusedBorderColor = DuoColors.Border,
+                focusedContainerColor = DuoColors.White,
+                unfocusedContainerColor = DuoColors.White,
+                cursorColor = DuoColors.Blue,
+                focusedTextColor = DuoColors.TextPrimary,
+                unfocusedTextColor = DuoColors.TextPrimary
+            ),
+            textStyle = LocalTextStyle.current.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp
+            )
+        )
+
+        // Hint text
+        Text(
+            text = "Nhấn Enter hoặc gõ dấu phẩy để thêm",
+            color = DuoColors.TextSecondary.copy(alpha = 0.6f),
+            fontSize = 11.sp,
+            modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+        )
+
+        // Chips
+        if (items.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(10.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items.forEach { item ->
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50.dp))
+                            .background(DuoColors.Blue.copy(alpha = 0.12f)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = item,
+                            color = DuoColors.Blue,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 12.dp, top = 6.dp, bottom = 6.dp, end = 4.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Xóa",
+                            tint = DuoColors.Blue.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .padding(horizontal = 6.dp)
+                                .size(14.dp)
+                                .clip(RoundedCornerShape(50.dp))
+                                .clickable { onRemoveItem(item) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

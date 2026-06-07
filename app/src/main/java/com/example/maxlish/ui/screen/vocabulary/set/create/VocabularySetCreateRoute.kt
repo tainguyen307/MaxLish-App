@@ -21,8 +21,10 @@ fun VocabularySetCreateRoute(
         }
     }
 
-    if (state.success) {
-        onSuccess()
+    LaunchedEffect(state.success) {
+        if (state.success) {
+            onSuccess()
+        }
     }
 
     VocabularySetCreateScreen(

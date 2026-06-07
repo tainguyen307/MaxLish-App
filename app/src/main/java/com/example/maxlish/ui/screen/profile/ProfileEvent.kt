@@ -9,4 +9,5 @@ sealed class ProfileEvent {
     data class LevelChanged(val value: UserLevel) : ProfileEvent()
     object SaveClicked : ProfileEvent()
     object LogoutClicked : ProfileEvent()
+    object SaveSuccessConsumed : ProfileEvent()
 }

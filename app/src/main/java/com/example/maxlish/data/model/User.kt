@@ -11,8 +11,8 @@ data class User(
     val avatarUrl: String = "",
 
     // Learning
-    val learningGoal: LearningGoal = LearningGoal.IELTS,
-    val level: UserLevel = UserLevel.A1,
+    val learningGoal: String = "IELTS",
+    val level: String = "A1",
 
     // Daily Target
     val dailyNewWords: Int = 20,
