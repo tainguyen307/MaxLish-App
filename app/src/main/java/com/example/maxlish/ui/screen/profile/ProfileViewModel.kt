@@ -3,6 +3,8 @@ package com.example.maxlish.ui.screen.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maxlish.data.repository.FirebaseAuthRepository
+import com.example.maxlish.data.model.LearningGoal
+import com.example.maxlish.data.model.UserLevel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,10 +22,30 @@ class ProfileViewModel(
     }
 
     private fun loadCurrentUser() {
-        val user = authRepository.getCurrentUser()
-        if (user != null) {
-            _state.update {
-                it.copy(displayName = user.displayName)
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val user = authRepository.getUserProfile()
+            if (user != null) {
+                val goalEnum = try {
+                    LearningGoal.valueOf(user.learningGoal)
+                } catch (e: Exception) {
+                    LearningGoal.IELTS
+                }
+                val levelEnum = try {
+                    UserLevel.valueOf(user.level)
+                } catch (e: Exception) {
+                    UserLevel.A1
+                }
+                _state.update {
+                    it.copy(
+                        displayName = user.displayName,
+                        learningGoal = goalEnum,
+                        level = levelEnum,
+                        isLoading = false
+                    )
+                }
+            } else {
+                _state.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -41,6 +63,9 @@ class ProfileViewModel(
             }
             ProfileEvent.SaveClicked -> saveProfile()
             ProfileEvent.LogoutClicked -> logout()
+            ProfileEvent.SaveSuccessConsumed -> _state.update {
+                it.copy(isSaveSuccess = false)
+            }
         }
     }
 
@@ -52,7 +77,12 @@ class ProfileViewModel(
         }
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
-            val result = authRepository.updateProfile(s.displayName, s.learningGoal.name, s.level.name)
+            val result = authRepository.updateProfile(
+                displayName = s.displayName,
+                learningGoal = s.learningGoal.name,
+                level = s.level.name
+                // dailyNewWords uses default = 20 — ProfileScreen không chỉnh field này
+            )
             result.fold(
                 onSuccess = {
                     _state.update { it.copy(isLoading = false, isSaveSuccess = true) }

@@ -66,6 +66,10 @@ class VocabularySetCreateViewModel(
             VocabularySetCreateEvent.OnCreateClick -> {
                 createSet()
             }
+
+            VocabularySetCreateEvent.OnBackClick -> {
+                // Handled at the UI navigation layer
+            }
         }
     }
 

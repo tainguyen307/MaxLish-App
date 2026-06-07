@@ -48,7 +48,10 @@ class VocabularyWordCreateViewModel(
                         pronunciation = word.pronunciation,
                         description = word.description,
                         example = word.example,
-                        difficulty = word.difficulty
+                        difficulty = word.difficulty,
+                        collocations = word.collocations,
+                        relatedWords = word.relatedWords,
+                        note = word.note
                     )
                 }
             }
@@ -72,6 +75,54 @@ class VocabularyWordCreateViewModel(
 
             is VocabularyWordCreateEvent.OnExampleChange ->
                 _state.update { it.copy(example = event.value) }
+
+            is VocabularyWordCreateEvent.OnDifficultyChange ->
+                _state.update { it.copy(difficulty = event.value) }
+
+            is VocabularyWordCreateEvent.OnNoteChange ->
+                _state.update { it.copy(note = event.value) }
+
+            is VocabularyWordCreateEvent.OnCollocationInputChange ->
+                _state.update { it.copy(collocationInput = event.value) }
+
+            VocabularyWordCreateEvent.OnAddCollocation ->
+                _state.update {
+                    if (it.collocationInput.isNotBlank() && !it.collocations.contains(it.collocationInput.trim())) {
+                        it.copy(
+                            collocations = it.collocations + it.collocationInput.trim(),
+                            collocationInput = ""
+                        )
+                    } else {
+                        it
+                    }
+                }
+
+            is VocabularyWordCreateEvent.OnRemoveCollocation ->
+                _state.update {
+                    it.copy(collocations = it.collocations - event.value)
+                }
+
+            is VocabularyWordCreateEvent.OnRelatedWordInputChange ->
+                _state.update { it.copy(relatedWordInput = event.value) }
+
+            VocabularyWordCreateEvent.OnAddRelatedWord ->
+                _state.update {
+                    if (it.relatedWordInput.isNotBlank() && !it.relatedWords.contains(it.relatedWordInput.trim())) {
+                        it.copy(
+                            relatedWords = it.relatedWords + it.relatedWordInput.trim(),
+                            relatedWordInput = ""
+                        )
+                    } else {
+                        it
+                    }
+                }
+
+            is VocabularyWordCreateEvent.OnRemoveRelatedWord ->
+                _state.update {
+                    it.copy(relatedWords = it.relatedWords - event.value)
+                }
+
+            VocabularyWordCreateEvent.OnBackClick -> Unit
 
             VocabularyWordCreateEvent.OnSaveClick ->
                 saveWord()
@@ -107,7 +158,10 @@ class VocabularyWordCreateViewModel(
                 pronunciation = s.pronunciation,
                 description = s.description,
                 example = s.example,
-                difficulty = s.difficulty
+                difficulty = s.difficulty,
+                collocations = s.collocations,
+                relatedWords = s.relatedWords,
+                note = s.note
             )
 
             val result = if (s.isEditMode) {

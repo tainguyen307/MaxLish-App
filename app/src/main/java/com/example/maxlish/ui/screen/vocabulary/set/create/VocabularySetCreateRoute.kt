@@ -8,7 +8,8 @@ import androidx.compose.runtime.collectAsState
 fun VocabularySetCreateRoute(
     setId: String? = null,
     viewModel: VocabularySetCreateViewModel,
-    onSuccess: () -> Unit
+    onSuccess: () -> Unit,
+    onBack: () -> Unit
 ) {
 
     val state = viewModel.state.collectAsState().value
@@ -20,12 +21,20 @@ fun VocabularySetCreateRoute(
         }
     }
 
-    if (state.success) {
-        onSuccess()
+    LaunchedEffect(state.success) {
+        if (state.success) {
+            onSuccess()
+        }
     }
 
     VocabularySetCreateScreen(
         state = state,
-        onEvent = viewModel::onEvent
+        onEvent = { event ->
+            if (event is VocabularySetCreateEvent.OnBackClick) {
+                onBack()
+            } else {
+                viewModel.onEvent(event)
+            }
+        }
     )
 }

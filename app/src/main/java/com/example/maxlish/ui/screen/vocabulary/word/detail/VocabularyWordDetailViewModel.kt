@@ -78,6 +78,10 @@ class VocabularyWordDetailViewModel(
                 }
             }
 
+            VocabularyWordDetailEvent.OnRefresh -> {
+                loadWord()
+            }
+
             else -> Unit
         }
     }

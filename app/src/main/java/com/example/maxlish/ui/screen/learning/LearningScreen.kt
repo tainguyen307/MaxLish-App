@@ -178,8 +178,11 @@ fun LearningScreen(
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     // 1. 3D DuoProgressBar
-                    val progressValue = if (state.queue.isNotEmpty()) {
-                        state.currentIndex.toFloat() / state.queue.size.toFloat()
+                    // Use initialQueueSize (not queue.size) so the denominator stays stable
+                    // even as AGAIN cards are re-appended to the queue during the session.
+                    val totalForProgress = if (state.initialQueueSize > 0) state.initialQueueSize else state.queue.size
+                    val progressValue = if (totalForProgress > 0) {
+                        state.currentIndex.toFloat() / totalForProgress.toFloat()
                     } else 0f
 
                     Column(
@@ -192,7 +195,7 @@ fun LearningScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Tiến độ: ${state.currentIndex}/${state.queue.size}",
+                                text = "Tiến độ: ${state.currentIndex}/$totalForProgress",
                                 color = DuoColors.TextSecondary,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold

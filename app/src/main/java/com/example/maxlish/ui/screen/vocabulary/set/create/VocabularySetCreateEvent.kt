@@ -12,4 +12,6 @@ sealed interface VocabularySetCreateEvent {
     data class OnRemoveTag(val tag: String) : VocabularySetCreateEvent
 
     data object OnCreateClick : VocabularySetCreateEvent
+
+    data object OnBackClick : VocabularySetCreateEvent
 }

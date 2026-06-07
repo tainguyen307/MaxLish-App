@@ -95,13 +95,17 @@ class HomeViewModel : ViewModel() {
             combine(
                 setsFlow,
                 progressRepository.getUserStats(userId),
-                progressRepository.getStudySessions(userId)
-            ) { sets, user, sessions ->
+                progressRepository.getStudySessions(userId),
+                learningRepository.observeLearningProgress(userId)
+            ) { sets, user, sessions, progressList ->
 
-                val progressList =
-                    learningRepository.getLearningProgress(userId)
+                val dueReviews =
+                    learningRepository.getDueReviews(userId)
                         .getOrNull() ?: emptyList()
 
+                // Build vocabulary set UI models with REAL progress data
+                // Progress is based on how many words have LearningProgress records
+                // (i.e., words that the user has studied at least once)
                 val courses =
                     sets.map { set ->
 
@@ -110,22 +114,64 @@ class HomeViewModel : ViewModel() {
                                 it.setId == set.setId
                             }
 
+                        // Count words that have been studied (have a LearningProgress entry)
+                        val learnedWords = setProgress.size
+
+                        // Count words that are fully mastered (SM-2 mastered flag)
                         val masteredWords =
                             setProgress.count { it.mastered }
 
+                        // Progress is based on learned words, not just mastered
+                        // This gives users immediate visual feedback after studying
                         val progress =
                             if (set.wordCount == 0) 0f
-                            else masteredWords.toFloat() / set.wordCount.toFloat()
+                            else learnedWords.toFloat() / set.wordCount.toFloat()
 
                         VocabularySetUiModel(
                             id = set.setId,
                             title = set.title,
                             totalWords = set.wordCount,
-                            progress = progress
+                            learnedWords = learnedWords,
+                            progress = progress.coerceAtMost(1f)
                         )
                     }
 
-                Triple(user, sessions, courses)
+                // Compute global stats from User profile for consistency
+                val totalCorrect = user?.correctAnswers ?: 0
+                val totalWrong = user?.wrongAnswers ?: 0
+
+                val totalAnswers = totalCorrect + totalWrong
+
+                val accuracy =
+                    if (totalAnswers == 0) 0
+                    else (totalCorrect * 100) / totalAnswers
+
+                // Total words learned across all sets
+                val totalLearnedWords = progressList.size
+
+                // Total mastered words
+                val totalMasteredWords = progressList.count { it.mastered }
+
+                // Pack all computed data into a single result
+                data class HomeData(
+                    val user: com.example.maxlish.data.model.User?,
+                    val sessions: List<StudySession>,
+                    val courses: List<VocabularySetUiModel>,
+                    val dueReviewCount: Int,
+                    val accuracy: Int,
+                    val totalLearnedWords: Int,
+                    val totalMasteredWords: Int
+                )
+
+                HomeData(
+                    user = user,
+                    sessions = sessions,
+                    courses = courses,
+                    dueReviewCount = dueReviews.size,
+                    accuracy = accuracy,
+                    totalLearnedWords = totalLearnedWords,
+                    totalMasteredWords = totalMasteredWords
+                )
             }
                 .catch { e ->
                     _state.value = _state.value.copy(
@@ -133,41 +179,23 @@ class HomeViewModel : ViewModel() {
                         errorMessage = e.message
                     )
                 }
-                .collect { (user, sessions, courses) ->
+                .collect { data ->
 
-                    val currentCourse = courses.firstOrNull()
+                    val currentCourse = data.courses.firstOrNull()
 
-                     val progressList =
-                        learningRepository.getLearningProgress(userId)
-                            .getOrNull() ?: emptyList()
-
-                     val dueReviews =
-                        learningRepository.getDueReviews(userId)
-                            .getOrNull() ?: emptyList()
-
-                     val totalCorrect =
-                        progressList.sumOf { it.correctCount }
-
-                     val totalWrong =
-                        progressList.sumOf { it.wrongCount }
-
-                     val totalAnswers = totalCorrect + totalWrong
-
-                     val accuracy =
-                        if (totalAnswers == 0) 0
-                        else (totalCorrect * 100) / totalAnswers
-
-                     val masteredWords =
-                        progressList.count { it.mastered }
+                    // Remaining words = total words in current set - learned words in current set
+                    val remaining = if (currentCourse != null) {
+                        (currentCourse.totalWords - currentCourse.learnedWords).coerceAtLeast(0)
+                    } else 0
 
                      _state.value = _state.value.copy(
 
                          isLoading = false,
 
-                         userName = user?.displayName ?: "Learner 👋",
-                         streak = user?.streak ?: 0,
+                         userName = data.user?.displayName ?: "Learner 👋",
+                         streak = data.user?.streak ?: 0,
 
-                         reviewCount = dueReviews.size,
+                         reviewCount = data.dueReviewCount,
 
                          currentCourseTitle =
                              currentCourse?.title ?: "Start Learning",
@@ -175,20 +203,17 @@ class HomeViewModel : ViewModel() {
                          currentLesson =
                              "${currentCourse?.totalWords ?: 0} words",
 
-                         remainingWords =
-                             (currentCourse?.totalWords ?: 0) -
-                                     ((currentCourse?.progress ?: 0f)
-                                             * (currentCourse?.totalWords ?: 0)).toInt(),
+                         remainingWords = remaining,
 
                          learningProgress = currentCourse?.progress ?: 0f,
 
-                         earnedXp = masteredWords * 10,
+                         earnedXp = data.totalMasteredWords * 10,
 
-                         accuracy = accuracy,
+                         accuracy = data.accuracy,
 
-                         weeklyActivity = buildWeeklyActivity(sessions),
+                         weeklyActivity = buildWeeklyActivity(data.sessions),
 
-                         vocabularySets = courses,
+                         vocabularySets = data.courses,
                          currentVocabularySetId = currentCourse?.id,
                          currentVocabularySetTitle = currentCourse?.title ?: "Start Learning"
                      )
@@ -202,9 +227,26 @@ class HomeViewModel : ViewModel() {
 
         val result = MutableList(7) { 0 }
 
-        sessions.takeLast(7).forEachIndexed { index, session ->
-            result[index] = session.durationMinutes.coerceAtMost(100)
-        }
+        // Only include sessions from the last 7 days
+        val sevenDaysAgo = System.currentTimeMillis() - 7 * 86400000L
+
+        sessions
+            .filter { it.startedAt >= sevenDaysAgo }
+            .forEach { session ->
+                val calendar = java.util.Calendar.getInstance()
+                calendar.timeInMillis = session.startedAt
+                val dayIndex = when (calendar.get(java.util.Calendar.DAY_OF_WEEK)) {
+                    java.util.Calendar.MONDAY -> 0
+                    java.util.Calendar.TUESDAY -> 1
+                    java.util.Calendar.WEDNESDAY -> 2
+                    java.util.Calendar.THURSDAY -> 3
+                    java.util.Calendar.FRIDAY -> 4
+                    java.util.Calendar.SATURDAY -> 5
+                    java.util.Calendar.SUNDAY -> 6
+                    else -> 0
+                }
+                result[dayIndex] += session.durationMinutes.coerceAtMost(100)
+            }
 
         return result
     }

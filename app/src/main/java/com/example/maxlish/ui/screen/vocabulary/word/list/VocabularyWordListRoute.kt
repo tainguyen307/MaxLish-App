@@ -12,6 +12,8 @@ fun VocabularyWordListRoute(
 
     onNavigateToCreate: () -> Unit,
 
+    onBack: () -> Unit,
+
     viewModel: VocabularyWordListViewModel
 ) {
 
@@ -39,6 +41,10 @@ fun VocabularyWordListRoute(
                 VocabularyWordListEvent.OnAddWordClick -> {
 
                     onNavigateToCreate()
+                }
+
+                VocabularyWordListEvent.OnBackClick -> {
+                    onBack()
                 }
 
                 else -> {

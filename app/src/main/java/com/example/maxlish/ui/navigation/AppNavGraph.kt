@@ -12,7 +12,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -31,6 +33,8 @@ import com.example.maxlish.ui.screen.learning.LearningRoute
 import com.example.maxlish.ui.screen.learning.LearningViewModel
 import com.example.maxlish.ui.screen.home.HomeRoute
 import com.example.maxlish.ui.screen.login.LoginScreen
+import com.example.maxlish.ui.screen.onboarding.OnboardingScreen
+import com.example.maxlish.ui.screen.onboarding.OnboardingViewModel
 import com.example.maxlish.ui.screen.profile.ProfileRoute
 import com.example.maxlish.ui.screen.progress.ProgressScreen
 import com.example.maxlish.ui.screen.progress.ProgressViewModel
@@ -51,6 +55,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 object AppDestinations {
     const val LOGIN = "login"
     const val REGISTER = "register"
+    const val ONBOARDING = "onboarding"
     const val PROFILE = "profile"
     const val HOME = "home"
     const val PROGRESS = "progress"
@@ -106,12 +111,13 @@ fun AppNavGraph(
     val vocabularyRepository =
         FirebaseVocabularyRepository(firestore)
 
-    val startDestination =
+    val startDestination = remember {
         if (authRepository.getCurrentUser() != null) {
             AppDestinations.HOME
         } else {
             AppDestinations.LOGIN
         }
+    }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
 
@@ -251,9 +257,9 @@ fun AppNavGraph(
 
                 RegisterScreen(
                     onRegisterSuccess = {
-
+                        // Sau đăng ký → Onboarding wizard (không phải Profile)
                         navController.navigate(
-                            AppDestinations.PROFILE
+                            AppDestinations.ONBOARDING
                         ) {
                             popUpTo(AppDestinations.REGISTER) {
                                 inclusive = true
@@ -263,6 +269,22 @@ fun AppNavGraph(
 
                     onNavigateToLogin = {
                         navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(AppDestinations.ONBOARDING) {
+
+                val vm: OnboardingViewModel = viewModel()
+                val state by vm.state.collectAsState()
+
+                OnboardingScreen(
+                    state = state,
+                    onEvent = vm::onEvent,
+                    onNavigateToHome = {
+                        navController.navigate(AppDestinations.HOME) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -323,6 +345,8 @@ fun AppNavGraph(
 
                 val progressRepository =
                     FirebaseProgressRepository(firestore)
+                val learningRepository =
+                    FirebaseLearningRepository(firestore)
 
                 val viewModel: ProgressViewModel =
                     viewModel(
@@ -336,7 +360,8 @@ fun AppNavGraph(
 
                                 return ProgressViewModel(
                                     authRepository,
-                                    progressRepository
+                                    progressRepository,
+                                    learningRepository
                                 ) as T
                             }
                         }
@@ -367,6 +392,11 @@ fun AppNavGraph(
                     onNavigateToEdit = { setId ->
                         navController.navigate(
                             AppDestinations.vocabularyEdit(setId)
+                        )
+                    },
+                    onNavigateToLearn = { setId ->
+                        navController.navigate(
+                            AppDestinations.learn(setId, "all")
                         )
                     }
                 )
@@ -407,6 +437,9 @@ fun AppNavGraph(
                                 inclusive = true
                             }
                         }
+                    },
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
@@ -445,6 +478,9 @@ fun AppNavGraph(
                     setId = setId,
                     viewModel = viewModel,
                     onSuccess = {
+                        navController.popBackStack()
+                    },
+                    onBack = {
                         navController.popBackStack()
                     }
                 )
@@ -533,15 +569,25 @@ fun AppNavGraph(
                     onNavigateToDetail = { wordId ->
 
                         navController.navigate(
+
                             AppDestinations.vocabularyWordDetail(setId, wordId)
+
                         )
+
                     },
 
                     onNavigateToCreate = {
 
                         navController.navigate(
+
                             AppDestinations.vocabularyWordCreate(setId)
+
                         )
+
+                    },
+
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }

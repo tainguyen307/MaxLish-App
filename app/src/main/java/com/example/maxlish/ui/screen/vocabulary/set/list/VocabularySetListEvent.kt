@@ -8,4 +8,5 @@ sealed class VocabularySetListEvent {
     data class OnLearnClick(val setId: String) : VocabularySetListEvent()
     data class OnEditClick(val setId: String) : VocabularySetListEvent()
     data class OnDeleteClick(val setId: String) : VocabularySetListEvent()
+    data object OnRetry : VocabularySetListEvent()
 }

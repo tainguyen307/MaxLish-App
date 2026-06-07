@@ -8,5 +8,7 @@ data class VocabularySetUiModel(
 
     val totalWords: Int,
 
+    val learnedWords: Int = 0,
+
     val progress: Float
 )

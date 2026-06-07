@@ -4,6 +4,10 @@ import com.example.maxlish.data.model.LearningProgress
 import com.example.maxlish.data.model.Review
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 
 class FirebaseLearningRepository(
     private val firestore: FirebaseFirestore
@@ -14,6 +18,28 @@ class FirebaseLearningRepository(
 
     private val reviewCollection =
         firestore.collection("reviews")
+
+    override fun observeLearningProgress(
+        userId: String
+    ): Flow<List<LearningProgress>> = callbackFlow {
+        val listener = progressCollection
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val progressList = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(LearningProgress::class.java)?.copy(
+                        progressId = doc.id
+                    )
+                } ?: emptyList()
+
+                trySend(progressList)
+            }
+        awaitClose { listener.remove() }
+    }
 
     override suspend fun getLearningProgress(
         userId: String
