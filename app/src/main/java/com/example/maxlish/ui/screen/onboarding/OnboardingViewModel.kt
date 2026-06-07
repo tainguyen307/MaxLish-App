@@ -2,6 +2,7 @@ package com.example.maxlish.ui.screen.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.maxlish.data.repository.AuthRepository
 import com.example.maxlish.data.repository.FirebaseAuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -9,10 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class OnboardingViewModel : ViewModel() {
-
-    // Khởi tạo repository bên trong class, không qua constructor
-    // → viewModel() factory mặc định trong Compose sẽ hoạt động đúng
-    private val authRepository = FirebaseAuthRepository()
+    private val authRepository: AuthRepository = FirebaseAuthRepository()
 
     private val _state = MutableStateFlow(OnboardingState())
     val state = _state.asStateFlow()

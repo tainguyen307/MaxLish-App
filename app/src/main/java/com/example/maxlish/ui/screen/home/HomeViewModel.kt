@@ -4,12 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maxlish.data.model.StudySession
+import com.example.maxlish.data.repository.AuthRepository
+import com.example.maxlish.data.repository.FirebaseAuthRepository
 import com.example.maxlish.data.repository.FirebaseLearningRepository
 import com.example.maxlish.data.repository.FirebaseProgressRepository
 import com.example.maxlish.data.repository.FirebaseVocabularyRepository
 import com.example.maxlish.data.seed.SeedData
 import com.example.maxlish.ui.screen.home.model.VocabularySetUiModel
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel : ViewModel() {
 
     private val firestore = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    private val authRepository: AuthRepository = FirebaseAuthRepository()
 
     private val vocabularyRepository =
         FirebaseVocabularyRepository(firestore)
@@ -47,11 +48,10 @@ class HomeViewModel : ViewModel() {
         MutableStateFlow<List<com.example.maxlish.data.model.VocabularySet>>(emptyList())
 
     init {
+        val currentUser = authRepository.getCurrentUser()
 
-        val userId = auth.currentUser?.uid ?: ""
-
-        if (userId.isNotBlank()) {
-
+        if (currentUser != null) {
+            val userId = currentUser.uid ?: ""
             // =========================
             // 1. REALTIME VOCAB SETS (TỰ ĐỘNG SEED KHI RỖNG)
             // =========================
@@ -60,7 +60,7 @@ class HomeViewModel : ViewModel() {
                     .collect { sets ->
                         if (sets.isEmpty()) {
                             try {
-                                val email = auth.currentUser?.email ?: "newuser@example.com"
+                                val email = currentUser.email ?: "newuser@example.com"
                                 Log.d("AUTO_SEED", "Chưa có dữ liệu. Tiến hành tự động nạp dữ liệu mẫu cho $userId...")
                                 SeedData().seedForUser(userId, email)
                             } catch (e: Exception) {

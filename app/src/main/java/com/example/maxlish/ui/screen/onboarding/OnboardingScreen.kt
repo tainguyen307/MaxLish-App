@@ -36,10 +36,6 @@ import com.example.maxlish.data.model.UserLevel
 import com.example.maxlish.ui.component.DuoButton
 import com.example.maxlish.ui.component.DuoColors
 
-// ============================================================
-// ONBOARDING SCREEN — Wizard 3 bước sau khi đăng ký
-// ============================================================
-
 @OptIn(androidx.compose.animation.ExperimentalAnimationApi::class)
 @Composable
 fun OnboardingScreen(
@@ -200,9 +196,7 @@ fun OnboardingScreen(
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-// STEP 1 — Chọn mục tiêu học
-// ─────────────────────────────────────────────────────────────
+// Chọn mục tiêu học
 @Composable
 private fun StepGoal(
     selected: LearningGoal?,
@@ -277,9 +271,7 @@ private fun StepGoal(
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-// STEP 2 — Chọn trình độ
-// ─────────────────────────────────────────────────────────────
+//Chọn trình độ
 @Composable
 private fun StepLevel(
     selected: UserLevel?,
@@ -364,9 +356,7 @@ private fun StepLevel(
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-// STEP 3 — Số từ mục tiêu mỗi ngày
-// ─────────────────────────────────────────────────────────────
+// Số từ mục tiêu mỗi ngày
 @Composable
 private fun StepDailyWords(
     selected: Int,
