@@ -323,6 +323,8 @@ fun AppNavGraph(
 
                 val progressRepository =
                     FirebaseProgressRepository(firestore)
+                val learningRepository =
+                    FirebaseLearningRepository(firestore)
 
                 val viewModel: ProgressViewModel =
                     viewModel(
@@ -336,7 +338,8 @@ fun AppNavGraph(
 
                                 return ProgressViewModel(
                                     authRepository,
-                                    progressRepository
+                                    progressRepository,
+                                    learningRepository
                                 ) as T
                             }
                         }
@@ -367,6 +370,11 @@ fun AppNavGraph(
                     onNavigateToEdit = { setId ->
                         navController.navigate(
                             AppDestinations.vocabularyEdit(setId)
+                        )
+                    },
+                    onNavigateToLearn = { setId ->
+                        navController.navigate(
+                            AppDestinations.learn(setId, "all")
                         )
                     }
                 )
@@ -407,6 +415,9 @@ fun AppNavGraph(
                                 inclusive = true
                             }
                         }
+                    },
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
@@ -445,6 +456,9 @@ fun AppNavGraph(
                     setId = setId,
                     viewModel = viewModel,
                     onSuccess = {
+                        navController.popBackStack()
+                    },
+                    onBack = {
                         navController.popBackStack()
                     }
                 )
@@ -533,15 +547,25 @@ fun AppNavGraph(
                     onNavigateToDetail = { wordId ->
 
                         navController.navigate(
+
                             AppDestinations.vocabularyWordDetail(setId, wordId)
+
                         )
+
                     },
 
                     onNavigateToCreate = {
 
                         navController.navigate(
+
                             AppDestinations.vocabularyWordCreate(setId)
+
                         )
+
+                    },
+
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }

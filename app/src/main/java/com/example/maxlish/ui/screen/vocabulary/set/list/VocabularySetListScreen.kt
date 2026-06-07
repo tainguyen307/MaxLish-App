@@ -29,6 +29,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,109 +63,160 @@ fun VocabularySetListScreen(
     Scaffold(
         containerColor = DuoColors.Background,
         floatingActionButton = {
-            // Nút bấm thêm bộ từ vựng dạng 3D tròn
-            DuoCard(
-                modifier = Modifier.size(56.dp),
-                backgroundColor = DuoColors.Blue,
-                borderColor = DuoColors.BlueDark,
-                shadowHeight = 4.dp,
-                shape = CircleShape,
-                onClick = {
-                    onEvent(VocabularySetListEvent.OnCreateSetClick)
-                }
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+            if (!state.isLoading && state.errorMessage == null) {
+                // Nút bấm thêm bộ từ vựng dạng 3D tròn
+                DuoCard(
+                    modifier = Modifier.size(56.dp),
+                    backgroundColor = DuoColors.Blue,
+                    borderColor = DuoColors.BlueDark,
+                    shadowHeight = 4.dp,
+                    shape = CircleShape,
+                    onClick = {
+                        onEvent(VocabularySetListEvent.OnCreateSetClick)
+                    }
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Thêm bộ từ",
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Thêm bộ từ",
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
         }
     ) { paddingValues ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(
-                horizontal = 16.dp,
-                vertical = 16.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues)
         ) {
-            item {
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = DuoColors.Blue
+                )
+            } else if (state.errorMessage != null) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                        .align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Bộ Từ Vựng",
-                        color = DuoColors.TextPrimary,
+                        text = "Đã xảy ra lỗi 😢",
+                        color = DuoColors.Red,
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 28.sp
+                        fontSize = 20.sp
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Bạn đang sở hữu ${state.vocabularySets.size} bộ từ vựng",
+                        text = state.errorMessage,
                         color = DuoColors.TextSecondary,
+                        fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
-                }
-            }
-
-            item {
-                // Search field bo tròn lớn kiểu Duolingo
-                OutlinedTextField(
-                    value = state.searchQuery,
-                    onValueChange = {
-                        onEvent(VocabularySetListEvent.OnSearchChange(it))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text("Tìm kiếm bộ từ vựng...", fontWeight = FontWeight.Bold)
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = DuoColors.TextSecondary
+                    Spacer(modifier = Modifier.height(20.dp))
+                    DuoButton(
+                        onClick = { onEvent(VocabularySetListEvent.OnRetry) },
+                        backgroundColor = DuoColors.Blue,
+                        bottomColor = DuoColors.BlueDark,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "Thử lại",
+                            color = Color.White,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 14.sp
                         )
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = DuoColors.White,
-                        unfocusedContainerColor = DuoColors.White,
-                        focusedBorderColor = DuoColors.Blue,
-                        unfocusedBorderColor = DuoColors.Border
-                    )
-                )
-            }
-
-            items(state.vocabularySets) { set ->
-                VocabularySetCard3D(
-                    set = set,
-                    onClick = {
-                        onEvent(VocabularySetListEvent.OnSetClick(set.id))
-                    },
-                    onLearnClick = {
-                        onEvent(VocabularySetListEvent.OnLearnClick(set.id))
-                    },
-                    onEditClick = {
-                        onEvent(VocabularySetListEvent.OnEditClick(set.id))
-                    },
-                    onDeleteClick = {
-                        deleteSetId = set.id
                     }
-                )
-            }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = 16.dp,
+                        vertical = 16.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        ) {
+                            Text(
+                                text = "Bộ Từ Vựng",
+                                color = DuoColors.TextPrimary,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 28.sp
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Bạn đang sở hữu ${state.vocabularySets.size} bộ từ vựng",
+                                color = DuoColors.TextSecondary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
 
-            item {
-                Spacer(modifier = Modifier.height(100.dp))
+                    item {
+                        // Search field bo tròn lớn kiểu Duolingo
+                        OutlinedTextField(
+                            value = state.searchQuery,
+                            onValueChange = {
+                                onEvent(VocabularySetListEvent.OnSearchChange(it))
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = {
+                                Text("Tìm kiếm bộ từ vựng...", fontWeight = FontWeight.Bold)
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = DuoColors.TextSecondary
+                                )
+                            },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = DuoColors.White,
+                                unfocusedContainerColor = DuoColors.White,
+                                focusedBorderColor = DuoColors.Blue,
+                                unfocusedBorderColor = DuoColors.Border
+                            )
+                        )
+                    }
+
+                    items(state.vocabularySets) { set ->
+                        VocabularySetCard3D(
+                            set = set,
+                            onClick = {
+                                onEvent(VocabularySetListEvent.OnSetClick(set.id))
+                            },
+                            onLearnClick = {
+                                onEvent(VocabularySetListEvent.OnLearnClick(set.id))
+                            },
+                            onEditClick = {
+                                onEvent(VocabularySetListEvent.OnEditClick(set.id))
+                            },
+                            onDeleteClick = {
+                                deleteSetId = set.id
+                            }
+                        )
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(100.dp))
+                    }
+                }
             }
         }
 

@@ -12,4 +12,7 @@ sealed class VocabularyWordListEvent {
     data class OnSearchChange(
         val query: String
     ) : VocabularyWordListEvent()
+
+    data object OnBackClick
+        : VocabularyWordListEvent()
 }

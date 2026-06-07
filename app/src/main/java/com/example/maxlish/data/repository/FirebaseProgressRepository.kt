@@ -9,9 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-class FirebaseProgressRepository(instance: FirebaseFirestore) : ProgressRepository {
-
-    private val firestore = FirebaseFirestore.getInstance()
+class FirebaseProgressRepository(private val firestore: FirebaseFirestore) : ProgressRepository {
 
     override fun getUserStats(userId: String): Flow<User?> = callbackFlow {
         val subscription = firestore.collection("users").document(userId)

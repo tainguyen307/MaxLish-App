@@ -2,8 +2,13 @@ package com.example.maxlish.data.repository
 
 import com.example.maxlish.data.model.LearningProgress
 import com.example.maxlish.data.model.Review
+import kotlinx.coroutines.flow.Flow
 
 interface LearningRepository {
+
+    fun observeLearningProgress(
+        userId: String
+    ): Flow<List<LearningProgress>>
 
     suspend fun getLearningProgress(
         userId: String

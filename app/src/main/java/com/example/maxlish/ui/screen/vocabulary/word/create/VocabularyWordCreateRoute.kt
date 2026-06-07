@@ -47,6 +47,10 @@ fun VocabularyWordCreateRoute(
                     viewModel.onEvent(event)
                 }
 
+                VocabularyWordCreateEvent.OnBackClick -> {
+                    onBack()
+                }
+
                 else -> {
                     viewModel.onEvent(event)
                 }
