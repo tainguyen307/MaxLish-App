@@ -19,6 +19,10 @@ fun VocabularyWordDetailRoute(
 
     val state by viewModel.state.collectAsState()
 
+    LaunchedEffect(wordId) {
+        viewModel.onEvent(VocabularyWordDetailEvent.OnRefresh)
+    }
+
     LaunchedEffect(state.isDeleted) {
         if (state.isDeleted) {
             onBack()

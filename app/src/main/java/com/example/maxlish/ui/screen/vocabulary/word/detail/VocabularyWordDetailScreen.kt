@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -96,12 +97,26 @@ fun VocabularyWordDetailScreen(
                 shadowHeight = 4.dp,
                 shape = RoundedCornerShape(26.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    IconButton(
+                        onClick = { onEvent(VocabularyWordDetailEvent.OnBackClick) },
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Quay lại",
+                            tint = DuoColors.TextPrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                     Box(
                         modifier = Modifier
                             .size(64.dp)
@@ -167,6 +182,7 @@ fun VocabularyWordDetailScreen(
                     }
                 }
             }
+        }
 
             // Định nghĩa Block
             DuoCard(

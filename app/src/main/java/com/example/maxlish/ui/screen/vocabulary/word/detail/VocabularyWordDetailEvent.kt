@@ -7,4 +7,6 @@ sealed class VocabularyWordDetailEvent {
     data object OnEditClick : VocabularyWordDetailEvent()
 
     data object OnDeleteClick : VocabularyWordDetailEvent()
+
+    data object OnRefresh : VocabularyWordDetailEvent()
 }

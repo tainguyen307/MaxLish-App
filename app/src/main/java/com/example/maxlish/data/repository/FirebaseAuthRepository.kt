@@ -101,10 +101,35 @@ class FirebaseAuthRepository : AuthRepository {
         )
     }
 
+    override suspend fun getUserProfile(): User? {
+        val firebaseUser = auth.currentUser ?: return null
+        return try {
+            val doc = firestore.collection("users").document(firebaseUser.uid).get().await()
+            if (doc.exists()) {
+                doc.toObject(User::class.java)
+            } else {
+                // Fallback: trả về thông tin cơ bản từ Firebase Auth
+                User(
+                    uid = firebaseUser.uid,
+                    email = firebaseUser.email ?: "",
+                    displayName = firebaseUser.displayName ?: ""
+                )
+            }
+        } catch (e: Exception) {
+            // Fallback nếu lỗi mạng
+            User(
+                uid = firebaseUser.uid,
+                email = firebaseUser.email ?: "",
+                displayName = firebaseUser.displayName ?: ""
+            )
+        }
+    }
+
     override suspend fun updateProfile(
         displayName: String,
         learningGoal: String,
-        level: String
+        level: String,
+        dailyNewWords: Int
     ): Result<Unit> {
         return try {
             val firebaseUser = auth.currentUser
@@ -118,24 +143,13 @@ class FirebaseAuthRepository : AuthRepository {
             val userDocRef = firestore.collection("users").document(firebaseUser.uid)
             val docSnapshot = userDocRef.get().await()
 
-            val goalEnum = try {
-                com.example.maxlish.data.model.LearningGoal.valueOf(learningGoal)
-            } catch (e: Exception) {
-                com.example.maxlish.data.model.LearningGoal.IELTS
-            }
-
-            val levelEnum = try {
-                com.example.maxlish.data.model.UserLevel.valueOf(level)
-            } catch (e: Exception) {
-                com.example.maxlish.data.model.UserLevel.A1
-            }
-
             val updatedUser = if (docSnapshot.exists()) {
                 val existingUser = docSnapshot.toObject(User::class.java)!!
                 existingUser.copy(
                     displayName = displayName,
-                    learningGoal = goalEnum,
-                    level = levelEnum,
+                    learningGoal = learningGoal,
+                    level = level,
+                    dailyNewWords = dailyNewWords,
                     updatedAt = System.currentTimeMillis()
                 )
             } else {
@@ -143,8 +157,9 @@ class FirebaseAuthRepository : AuthRepository {
                     uid = firebaseUser.uid,
                     email = firebaseUser.email ?: "",
                     displayName = displayName,
-                    learningGoal = goalEnum,
-                    level = levelEnum,
+                    learningGoal = learningGoal,
+                    level = level,
+                    dailyNewWords = dailyNewWords,
                     updatedAt = System.currentTimeMillis()
                 )
             }
@@ -155,6 +170,7 @@ class FirebaseAuthRepository : AuthRepository {
             Result.failure(e)
         }
     }
+
 
     private fun mapFirebaseError(e: Exception): Exception {
         val message = e.message ?: ""

@@ -17,7 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -94,19 +96,35 @@ fun VocabularySetDetailScreen(
                 Column(
                     modifier = Modifier.padding(20.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(primaryColor.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.MenuBook,
-                            contentDescription = null,
-                            tint = primaryColor,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        IconButton(
+                            onClick = { onEvent(VocabularySetDetailEvent.OnBackClick) },
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Quay lại",
+                                tint = DuoColors.TextPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(primaryColor.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MenuBook,
+                                contentDescription = null,
+                                tint = primaryColor,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))

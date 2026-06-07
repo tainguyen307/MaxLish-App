@@ -509,7 +509,7 @@ fun VocabularySetCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "${vocabularySet.totalWords} từ vựng",
+                text = "${vocabularySet.learnedWords}/${vocabularySet.totalWords} từ đã học",
                 color = DuoColors.TextSecondary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
@@ -527,7 +527,12 @@ fun VocabularySetCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Nút bắt đầu học bộ từ tương ứng
+            // Nút bắt đầu học bộ từ tương ứng - hiển thị ngữ cảnh phù hợp
+            val buttonText = when {
+                vocabularySet.learnedWords == 0 -> "Bắt đầu"
+                vocabularySet.learnedWords >= vocabularySet.totalWords -> "Ôn tập"
+                else -> "Tiếp tục"
+            }
             DuoButton(
                 onClick = onClick,
                 backgroundColor = primaryColor,
@@ -536,7 +541,7 @@ fun VocabularySetCard(
                 shadowHeight = 3.dp
             ) {
                 Text(
-                    text = "Khám phá",
+                    text = buttonText,
                     color = Color.White,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 13.sp

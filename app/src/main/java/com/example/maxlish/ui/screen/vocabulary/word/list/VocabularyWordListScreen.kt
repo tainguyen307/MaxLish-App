@@ -20,8 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -89,20 +91,36 @@ fun VocabularyWordListScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
-                Column(modifier = Modifier.padding(horizontal = 4.dp)) {
-                    Text(
-                        text = "Danh Sách Từ Vựng",
-                        color = DuoColors.TextPrimary,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 24.sp
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Bộ từ này có ${state.words.size} từ vựng",
-                        color = DuoColors.TextSecondary,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { onEvent(VocabularyWordListEvent.OnBackClick) },
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Quay lại",
+                            tint = DuoColors.TextPrimary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Danh Sách Từ Vựng",
+                            color = DuoColors.TextPrimary,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 24.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Bộ từ này có ${state.words.size} từ vựng",
+                            color = DuoColors.TextSecondary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 

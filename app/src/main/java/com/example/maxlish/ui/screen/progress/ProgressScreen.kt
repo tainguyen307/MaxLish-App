@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,8 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,14 +46,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maxlish.data.model.StudySession
+import com.example.maxlish.ui.component.DuoCard
+import com.example.maxlish.ui.component.DuoColors
 
-private val Primary = Color(0xFF2563EB)
-private val Secondary = Color(0xFF22C55E)
-private val Orange = Color(0xFFFF9800)
-private val Background = Color(0xFFF8FAFC)
-private val CardColor = Color.White
-private val TextPrimary = Color(0xFF0F172A)
-private val TextSecondary = Color(0xFF64748B)
+private val Primary = DuoColors.Blue
+private val Secondary = DuoColors.Green
+private val Orange = DuoColors.Orange
+private val Background = DuoColors.Background
+private val CardColor = DuoColors.White
+private val TextPrimary = DuoColors.TextPrimary
+private val TextSecondary = DuoColors.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +71,7 @@ fun ProgressScreen(
                 title = { 
                     Text(
                         "Progress Tracking",
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = TextPrimary
                     ) 
                 },
@@ -143,7 +144,7 @@ fun ProgressScreen(
 
                 item {
                     LevelCard(
-                        level = uiState.user?.level?.name ?: "A1",
+                        level = uiState.user?.level ?: "A1",
                         category = viewModel.getLevelCategory()
                     )
                 }
@@ -163,12 +164,13 @@ fun ProgressScreen(
 
                 if (uiState.studySessions.isEmpty()) {
                     item {
-                        Card(
+                        DuoCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(140.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            colors = CardDefaults.cardColors(containerColor = CardColor)
+                            backgroundColor = CardColor,
+                            borderColor = DuoColors.Border,
+                            shape = RoundedCornerShape(24.dp)
                         ) {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
@@ -198,10 +200,11 @@ fun ProgressScreen(
 
 @Composable
 fun SessionCard(session: StudySession) {
-    Card(
+    DuoCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = CardColor)
+        backgroundColor = CardColor,
+        borderColor = DuoColors.Border,
+        shape = RoundedCornerShape(24.dp)
     ) {
         Row(
             modifier = Modifier
@@ -270,8 +273,9 @@ fun SectionTitle(title: String) {
     Text(
         text = title,
         color = TextPrimary,
-        fontWeight = FontWeight.Bold,
-        fontSize = 22.sp
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 20.sp,
+        modifier = Modifier.padding(horizontal = 4.dp)
     )
 }
 
@@ -283,10 +287,11 @@ fun StatCard(
     icon: ImageVector,
     iconColor: Color
 ) {
-    Card(
+    DuoCard(
         modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = CardColor)
+        backgroundColor = CardColor,
+        borderColor = DuoColors.Border,
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -324,10 +329,11 @@ fun StatCard(
 
 @Composable
 fun LevelCard(level: String, category: String) {
-    Card(
+    DuoCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = CardColor)
+        backgroundColor = CardColor,
+        borderColor = DuoColors.Border,
+        shape = RoundedCornerShape(28.dp)
     ) {
         Row(
             modifier = Modifier
@@ -371,21 +377,17 @@ fun LevelCard(level: String, category: String) {
 fun DailyActivityChart(
     values: List<Int>
 ) {
-
-    Card(
+    DuoCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = CardColor
-        )
+        backgroundColor = CardColor,
+        borderColor = DuoColors.Border,
+        shape = RoundedCornerShape(28.dp)
     ) {
-
         Column(
             modifier = Modifier.padding(22.dp)
         ) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -393,49 +395,49 @@ fun DailyActivityChart(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
-
-                val days =
-                    listOf("M", "T", "W", "T", "F", "S", "S")
+                val days = listOf("T2", "T3", "T4", "T5", "T6", "T7", "CN")
                 val todayIndex = (java.util.Calendar.getInstance()
                     .get(java.util.Calendar.DAY_OF_WEEK) + 5) % 7
 
+                val maxVal = values.maxOrNull()?.coerceAtLeast(1) ?: 1
+
                 values.forEachIndexed { index, value ->
+                    val columnHeightPercent = (value.toFloat() / maxVal.toFloat()).coerceIn(0.1f, 1.0f)
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom
+                        verticalArrangement = Arrangement.Bottom,
+                        modifier = Modifier.fillMaxHeight()
                     ) {
-
+                        // 3D Column
                         Box(
                             modifier = Modifier
-                                .width(28.dp)
-                                .height(
-                                    value
-                                        .coerceAtLeast(8)
-                                        .dp
-                                )
-                                .clip(
-                                    RoundedCornerShape(
-                                        topStart = 12.dp,
-                                        topEnd = 12.dp
-                                    )
-                                )
+                                .width(24.dp)
+                                .fillMaxHeight(columnHeightPercent)
+                                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                                 .background(
-
-                                    if (index == todayIndex)
-                                        Primary
-                                    else
-                                        Primary.copy(alpha = 0.22f)
+                                    if (index == todayIndex) Primary
+                                    else Primary.copy(alpha = 0.25f)
                                 )
-                        )
+                        ) {
+                            // 3D shadow highlights at top
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(4.dp)
+                                    .background(
+                                        if (index == todayIndex) DuoColors.BlueDark
+                                        else DuoColors.BlueDark.copy(alpha = 0.25f)
+                                    )
+                            )
+                        }
 
-                        Spacer(
-                            modifier = Modifier.height(8.dp)
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
                             text = days[index],
-                            color = TextSecondary,
+                            color = if (index == todayIndex) Primary else TextSecondary,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp
                         )
                     }

@@ -62,6 +62,7 @@ fun ProfileScreen(
 
     LaunchedEffect(state.isSaveSuccess) {
         if (state.isSaveSuccess) {
+            onEvent(ProfileEvent.SaveSuccessConsumed)
             onSaveSuccess()
         }
     }

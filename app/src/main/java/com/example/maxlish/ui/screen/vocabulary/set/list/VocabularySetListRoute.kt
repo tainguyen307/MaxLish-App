@@ -10,6 +10,7 @@ fun VocabularySetListRoute(
     onNavigateToDetail: (String) -> Unit,
     onNavigateToCreate: () -> Unit,
     onNavigateToEdit: (String) -> Unit,
+    onNavigateToLearn: (String) -> Unit,
     viewModel: VocabularySetListViewModel = viewModel()
 ) {
 
@@ -31,6 +32,10 @@ fun VocabularySetListRoute(
 
                 is VocabularySetListEvent.OnEditClick -> {
                     onNavigateToEdit(event.setId)
+                }
+
+                is VocabularySetListEvent.OnLearnClick -> {
+                    onNavigateToLearn(event.setId)
                 }
 
                 else -> {

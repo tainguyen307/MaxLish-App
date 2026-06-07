@@ -40,8 +40,10 @@ class FirebaseVocabularyRepository(
                         }
 
                         val sets =
-                            snapshot?.documents?.mapNotNull {
-                                it.toObject(VocabularySet::class.java)
+                            snapshot?.documents?.mapNotNull { doc ->
+                                doc.toObject(VocabularySet::class.java)?.copy(
+                                    setId = doc.id
+                                )
                             } ?: emptyList()
 
                         trySend(sets)

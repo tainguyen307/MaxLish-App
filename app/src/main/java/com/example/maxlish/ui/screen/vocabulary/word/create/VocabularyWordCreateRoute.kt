@@ -18,20 +18,19 @@ fun VocabularyWordCreateRoute(
 ) {
 
     val state by viewModel.state.collectAsState()
-    val effect = viewModel.effect.collectAsState(initial = null)
 
-    LaunchedEffect(effect.value) {
-        when (effect.value) {
-
-            is VocabularyWordCreateViewModel.Effect.Saved -> {
-                onBack()
+    // Fix: SharedFlow phải dùng LaunchedEffect + collect, KHÔNG dùng collectAsState()
+    // collectAsState() không hoạt động đúng với SharedFlow vì SharedFlow không giữ state
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is VocabularyWordCreateViewModel.Effect.Saved -> {
+                    onSuccess()
+                }
+                is VocabularyWordCreateViewModel.Effect.Error -> {
+                    // optional: show snackbar
+                }
             }
-
-            is VocabularyWordCreateViewModel.Effect.Error -> {
-                // optional: show toast/snackbar
-            }
-
-            null -> {}
         }
     }
 
@@ -45,6 +44,10 @@ fun VocabularyWordCreateRoute(
 
                 VocabularyWordCreateEvent.OnSaveClick -> {
                     viewModel.onEvent(event)
+                }
+
+                VocabularyWordCreateEvent.OnBackClick -> {
+                    onBack()
                 }
 
                 else -> {

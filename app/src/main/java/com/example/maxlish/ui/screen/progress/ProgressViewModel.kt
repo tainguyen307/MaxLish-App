@@ -6,6 +6,7 @@ import com.example.maxlish.data.model.StudySession
 import com.example.maxlish.data.model.User
 import com.example.maxlish.data.repository.AuthRepository
 import com.example.maxlish.data.repository.ProgressRepository
+import com.example.maxlish.data.repository.LearningRepository
 import kotlinx.coroutines.flow.*
 
 data class ProgressUiState(
@@ -18,7 +19,8 @@ data class ProgressUiState(
 
 class ProgressViewModel(
     private val authRepository: AuthRepository,
-    private val progressRepository: ProgressRepository
+    private val progressRepository: ProgressRepository,
+    private val learningRepository: LearningRepository
 ) : ViewModel() {
 
     private val _uiState =
@@ -57,25 +59,27 @@ class ProgressViewModel(
             ),
             progressRepository.getStudySessions(
                 currentUser.uid
+            ),
+            learningRepository.observeLearningProgress(
+                currentUser.uid
             )
-        ) { user, sessions ->
+        ) { user, sessions, progressList ->
+
+            val actualLearnedWords = progressList.size
+            val updatedUser = user?.copy(totalWordsLearned = actualLearnedWords) ?: User(
+                uid = currentUser.uid,
+                email = currentUser.email,
+                displayName = currentUser.displayName,
+                totalWordsLearned = actualLearnedWords
+            )
 
             ProgressUiState(
-
-                user =
-                    user ?: User(
-                        uid = currentUser.uid,
-                        email = currentUser.email,
-                        displayName = currentUser.displayName
-                    ),
-
+                user = updatedUser,
                 studySessions = sessions,
-
                 weeklyActivity =
                     buildWeeklyActivity(
                         sessions
                     ),
-
                 isLoading = false
             )
         }
@@ -101,7 +105,12 @@ class ProgressViewModel(
 
         val result = MutableList(7) { 0 }
 
-        sessions.forEach { session ->
+        // Only include sessions from the last 7 days
+        val sevenDaysAgo = System.currentTimeMillis() - 7 * 86400000L
+
+        sessions
+            .filter { it.startedAt >= sevenDaysAgo }
+            .forEach { session ->
 
             val calendar = java.util.Calendar.getInstance()
 
@@ -123,9 +132,7 @@ class ProgressViewModel(
             result[dayIndex] += session.reviewedWords
         }
 
-        return result.map {
-            it.coerceIn(10, 120)
-        }
+        return result
     }
 
     fun getAccuracy(): Float {
@@ -151,7 +158,7 @@ class ProgressViewModel(
             _uiState.value.user
                 ?: return "Beginner"
 
-        return when (user.level.name) {
+        return when (user.level) {
 
             "A1", "A2" ->
                 "Beginner"

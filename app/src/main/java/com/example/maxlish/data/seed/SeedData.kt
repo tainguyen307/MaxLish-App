@@ -29,26 +29,11 @@ class SeedData {
 
     suspend fun seedForUser(userId: String, email: String) {
         try {
-            seedUser(userId, email)
-            Log.d("SEED", "User profile seeded/updated for $userId")
-
             seedVocabularySets(userId)
             Log.d("SEED", "Vocabulary sets seeded for $userId")
 
             seedVocabularyWords(userId)
             Log.d("SEED", "Vocabulary words seeded for $userId")
-
-            seedLearningProgress(userId)
-            Log.d("SEED", "Learning progress seeded for $userId")
-
-            seedReviews(userId)
-            Log.d("SEED", "Reviews seeded for $userId")
-
-            seedStudySessions(userId)
-            Log.d("SEED", "Study sessions seeded for $userId")
-
-            seedNotifications(userId)
-            Log.d("SEED", "Notifications seeded for $userId")
 
             Log.d("SEED", "All seed completed for $userId")
         } catch (e: Exception) {
@@ -66,8 +51,8 @@ class SeedData {
             uid = userId,
             email = email,
             displayName = email.substringBefore("@"),
-            learningGoal = LearningGoal.IELTS,
-            level = UserLevel.B1,
+            learningGoal = LearningGoal.IELTS.name,
+            level = UserLevel.B1.name,
             streak = 12,
             totalWordsLearned = 120,
             correctAnswers = 320,
