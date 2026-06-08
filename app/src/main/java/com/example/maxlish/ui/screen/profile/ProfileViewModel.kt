@@ -5,13 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.maxlish.data.repository.FirebaseAuthRepository
 import com.example.maxlish.data.model.LearningGoal
 import com.example.maxlish.data.model.UserLevel
+import com.example.maxlish.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val authRepository: FirebaseAuthRepository = FirebaseAuthRepository()
+    private val authRepository: AuthRepository = FirebaseAuthRepository()
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState())

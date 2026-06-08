@@ -2,7 +2,6 @@ package com.example.maxlish.ui.screen.vocabulary.word.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.maxlish.data.model.VocabularyWord
 import com.example.maxlish.data.repository.VocabularyRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

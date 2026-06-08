@@ -175,16 +175,14 @@ class FirebaseAuthRepository : AuthRepository {
     private fun mapFirebaseError(e: Exception): Exception {
         val message = e.message ?: ""
         return when {
-            message.contains("INVALID_LOGIN_CREDENTIALS") ||
-            message.contains("wrong-password") ||
-            message.contains("user-not-found") ->
-                Exception("Email hoặc mật khẩu không đúng")
-            message.contains("email-already-in-use") ->
-                Exception("Email này đã được đăng ký")
-            message.contains("invalid-email") ->
-                Exception("Địa chỉ email không hợp lệ")
-            message.contains("weak-password") ->
-                Exception("Mật khẩu quá yếu, cần ít nhất 6 ký tự")
+            message.contains("auth credential") ->
+                Exception("Email hoặc mật khẩu không đúng.")
+            message.contains("already in use") ->
+                Exception("Email này đã được đăng ký.")
+            message.contains("email") ->
+                Exception("Địa chỉ email không hợp lệ.")
+            message.contains("at least") ->
+                Exception("Mật khẩu quá yếu, cần ít nhất 6 ký tự.")
             message.contains("network") ->
                 Exception("Không có kết nối mạng, vui lòng thử lại")
             else -> Exception("Đã có lỗi xảy ra: ${e.message}")
